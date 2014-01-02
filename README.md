@@ -8,7 +8,9 @@ This plugin configures `JavaCompile` tasks to use the [error-prone compiler].
 Requirements
 ------------
 
-This plugin depends on Gradle internal APIs, and only works with Gradle 1.8.
+This plugin depends on Gradle internal APIs, and is only guaranteed to work
+with the Gradle version it's been compiled against (check the `wrapper` task
+in the `build.gradle`.)
 
 Usage
 -----
@@ -39,6 +41,27 @@ repositories {
 
 When applied, the `errorprone` plugin automatically  changes all `JavaCompile` tasks in
 the project to use the error-prone compiler.
+
+The plugin adds an `errorprone` configuration that automatically uses the latest
+release of error-prone. You can override it to use a specific version with:
+
+```groovy
+configurations.errorprone {
+  resolutionStrategy.force 'com.google.errorprone:error_prone_core:1.0.8-patched'
+}
+```
+
+or if you changed the groupId of your fork:
+
+```groovy
+configurations.all {
+  resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+    if (details.requested.group == 'com.google.errorprone') {
+      details.useTarget "my.company.errorprone:${details.requested.name}:latest.release"
+    }
+  }
+}
+```
 
 Advanced usage
 --------------

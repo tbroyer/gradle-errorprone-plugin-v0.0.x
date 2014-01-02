@@ -12,7 +12,7 @@ class ErrorProneBasePlugin implements Plugin<Project> {
             }
         }
         project.dependencies {
-            errorprone 'com.google.errorprone:error_prone_core:1.0.3'
+            errorprone 'com.google.errorprone:error_prone_core:latest.release'
         }
     }
 }
