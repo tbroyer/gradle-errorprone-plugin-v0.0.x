@@ -7,10 +7,10 @@ sourceCompatibility = targetCompatibility = 1.6
 
 buildscript {
     repositories {
-        mavenCentral()
+        jcenter()
     }
     dependencies {
-        classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.3'
+        classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.6.1'
     }
 }
 
