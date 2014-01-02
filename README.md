@@ -1,6 +1,8 @@
 Gradle error-prone plugin
 =========================
 
+[![Build Status](https://travis-ci.org/tbroyer/gradle-errorprone-plugin.png?branch=master)](https://travis-ci.org/tbroyer/gradle-errorprone-plugin)
+
 This plugin configures `JavaCompile` tasks to use the [error-prone compiler].
 
 [error-prone compiler]: https://code.google.com/p/error-prone/
