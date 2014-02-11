@@ -20,7 +20,7 @@ dependencies {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = 1.10
+    gradleVersion = 1.11
 }
 
 modifyPom {
