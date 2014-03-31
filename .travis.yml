@@ -1,3 +1,11 @@
 language: groovy
+jdk:
+  - openjdk7
+  - oraclejdk8
+matrix:
+  allow_failures:
+    - jdk: oraclejdk8
+  fast_finish: true
 notifications:
-  email: false
+  email:
+    on_success: never
