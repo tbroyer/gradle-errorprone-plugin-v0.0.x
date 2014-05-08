@@ -1,7 +1,7 @@
 package net.ltgt.gradle.errorprone;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Constructor;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -14,12 +14,12 @@ import org.gradle.api.internal.TaskOutputsInternal;
 import org.gradle.api.internal.tasks.SimpleWorkResult;
 import org.gradle.api.internal.tasks.compile.CompilationFailedException;
 import org.gradle.api.internal.tasks.compile.Compiler;
-import org.gradle.api.internal.tasks.compile.IncrementalJavaCompiler;
 import org.gradle.api.internal.tasks.compile.JavaCompileSpec;
 import org.gradle.api.internal.tasks.compile.JavaCompilerArgumentsBuilder;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.tasks.WorkResult;
+import org.gradle.internal.Factory;
 import org.gradle.internal.jvm.Jvm;
 
 public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
@@ -29,8 +29,25 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
     return createIncrementalCompiler(task.getProject().getConfigurations().getByName("errorprone"), (TaskOutputsInternal) task.getOutputs());
   }
 
+  @SuppressWarnings("unchecked")
   public static Compiler<JavaCompileSpec> createIncrementalCompiler(Configuration configuration, TaskOutputsInternal taskOutputs) {
-    return new IncrementalJavaCompiler(new ErrorProneCompiler(configuration), null, taskOutputs);
+    try {
+      Class<?> compilerClass;
+      try {
+        // Gradle 1.12
+        compilerClass = Class.forName("org.gradle.api.internal.tasks.compile.CleaningJavaCompiler");
+      } catch (ClassNotFoundException e) {
+        // Gradle 1.11 and earlier
+        compilerClass = Class.forName("org.gradle.api.internal.tasks.compile.IncrementalJavaCompiler");
+      }
+      Constructor<?> ctor = compilerClass.getConstructor(Compiler.class, Factory.class, TaskOutputsInternal.class);
+      return (Compiler<JavaCompileSpec>) ctor.newInstance(new ErrorProneCompiler(configuration), null, taskOutputs);
+    } catch (Exception e) {
+      RuntimeException re = (e instanceof RuntimeException)
+          ? (RuntimeException) e
+          : new RuntimeException(e.getMessage(), e);
+      throw re;
+    }
   }
 
   private final Configuration errorprone;

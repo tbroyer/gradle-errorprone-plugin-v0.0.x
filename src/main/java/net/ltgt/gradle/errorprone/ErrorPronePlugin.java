@@ -14,6 +14,7 @@ public class ErrorPronePlugin implements Plugin<Project> {
     project.apply(Collections.singletonMap("plugin", ErrorProneBasePlugin.class));
 
     final Action<JavaCompile> action = new Action<JavaCompile>() {
+      @SuppressWarnings("deprecation")
       @Override
       public void execute(JavaCompile task) {
         task.setJavaCompiler(ErrorProneCompiler.createIncrementalCompiler(project.getConfigurations().getByName("errorprone"), task.getOutputs()));
