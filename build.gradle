@@ -15,12 +15,12 @@ buildscript {
 }
 
 dependencies {
-  compile gradleApi()
-  compile localGroovy()
+    compile gradleApi()
+    compile localGroovy()
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = 1.11
+    gradleVersion = 1.12
 }
 
 test {
