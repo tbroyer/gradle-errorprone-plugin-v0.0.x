@@ -1,18 +1,11 @@
-apply plugin: 'java'
-apply plugin: 'nexus'
+plugins {
+    id 'java'
+    id 'com.bmuschko.nexus' version '2.0'
+}
 
 group 'net.ltgt.gradle'
 
 sourceCompatibility = targetCompatibility = 1.6
-
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.6.1'
-    }
-}
 
 dependencies {
     compile gradleApi()
