@@ -1,8 +1,6 @@
 Gradle error-prone plugin
 =========================
 
-[![Build Status](https://travis-ci.org/tbroyer/gradle-errorprone-plugin.png?branch=master)](https://travis-ci.org/tbroyer/gradle-errorprone-plugin)
-
 This plugin configures `JavaCompile` tasks to use the [error-prone compiler].
 
 [error-prone compiler]: https://code.google.com/p/error-prone/
@@ -13,6 +11,15 @@ Requirements
 This plugin depends on Gradle internal APIs, and is only guaranteed to work
 with the Gradle version it's been compiled against (check the `wrapper` task
 in the `build.gradle`.)
+
+ Gradle error-prone plugin version | Supported Gradle versions
+ --------------------------------- | -------------------------
+ 0.0.1, 0.0.2                      | 1.8 - 1.11
+ 0.0.3                             | 1.8 - 1.12
+ 0.0.4-SNAPSHOT                    | 2.1
+
+_Note: Gradle 2.0 is not supported; it lacks APIs to manipulate the actual
+compiler being used._
 
 Usage
 -----
@@ -73,6 +80,29 @@ plugin instead, which doesn't reconfigure any task. You'll then configure each t
 follows (using the `compileJava` task as an example):
 
 ```groovy
+import net.ltgt.gradle.errorprone.ErrorProneToolChain
+
+compileJava {
+  toolChain ErrorProneToolChain.create(project)
+}
+```
+
+You can go further and provide a `configuration` containing the
+`com.google.errorprone:error_prone_core` dependency (defaults to
+`configurations.errorprone`) The above configuration is thus equivalent to:
+
+```groovy
+import net.ltgt.gradle.errorprone.ErrorProneToolChain
+
+compileJava {
+  toolChain new ErrorProneToolChain.create(configurations.errorprone)
+}
+```
+
+Advanced usage, legacy (Gradle 1.x)
+-----------------------------------
+
+```groovy
 import net.ltgt.gradle.errorprone.ErrorProneCompiler
 
 compileJava {
@@ -83,8 +113,8 @@ compileJava {
 // compileJava.javaCompiler ErrorProneCompiler.createIncrementalCompiler(compileJava)
 ```
 
-You can go further and provide a `configuration` containing the
-`com.google.errorprone:error_prone_core` dependency (defaults to 
+For even more control, provide a `configuration` containing the
+`com.google.errorprone:error_prone_core` dependency (defaults to
 `configurations.errorprone`) and task outputs (defaults to `task.outputs`). The above
 configuration is thus equivalent to:
 

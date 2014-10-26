@@ -13,11 +13,11 @@ public class ErrorPronePlugin implements Plugin<Project> {
   public void apply(final Project project) {
     project.apply(Collections.singletonMap("plugin", ErrorProneBasePlugin.class));
 
+    final ErrorProneToolChain toolChain = ErrorProneToolChain.create(project);
     final Action<JavaCompile> action = new Action<JavaCompile>() {
-      @SuppressWarnings("deprecation")
       @Override
       public void execute(JavaCompile task) {
-        task.setJavaCompiler(ErrorProneCompiler.createIncrementalCompiler(project.getConfigurations().getByName("errorprone"), task.getOutputs()));
+        task.setToolChain(toolChain);
       }
     };
 
