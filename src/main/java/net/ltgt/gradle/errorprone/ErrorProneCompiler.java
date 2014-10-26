@@ -15,6 +15,7 @@ import org.gradle.api.internal.tasks.compile.JavaCompilerArgumentsBuilder;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.tasks.WorkResult;
+import org.gradle.internal.UncheckedException;
 import org.gradle.internal.jvm.Jvm;
 import org.gradle.language.base.internal.compile.Compiler;
 
@@ -55,10 +56,7 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
       Object compiler = builderClass.getMethod("build").invoke(compilerBuilder);
       result = (Integer) compiler.getClass().getMethod("compile", String[].class).invoke(compiler, (Object) args.toArray(new String[args.size()]));
     } catch (Exception e) {
-      RuntimeException re = (e instanceof RuntimeException)
-          ? (RuntimeException) e
-          : new RuntimeException(e.getMessage(), e);
-      throw re;
+      throw UncheckedException.throwAsUncheckedException(e);
     } finally {
       Thread.currentThread().setContextClassLoader(tccl);
     }
