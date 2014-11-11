@@ -3,7 +3,7 @@ Gradle error-prone plugin
 
 This plugin configures `JavaCompile` tasks to use the [error-prone compiler].
 
-[error-prone compiler]: https://code.google.com/p/error-prone/
+[error-prone compiler]: http://errorprone.info/
 
 Requirements
 ------------
