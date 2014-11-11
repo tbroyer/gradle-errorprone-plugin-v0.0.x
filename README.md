@@ -17,6 +17,7 @@ in the `build.gradle`.)
  0.0.1, 0.0.2                      | 1.8 - 1.11
  0.0.3                             | 1.8 - 1.12
  0.0.4                             | 2.1
+ 0.0.5-SNAPSHOT                    | 2.2
 
 _Note: Gradle 2.0 is not supported; it lacks APIs to manipulate the actual
 compiler being used._
