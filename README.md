@@ -11,13 +11,14 @@ Requirements
 This plugin depends on Gradle internal APIs, and is only guaranteed to work
 with the Gradle version it's been compiled against (check the `wrapper` task
 in the `build.gradle`.)
+It also depends on Javac internal APIs, directly exposed by error-prone.
 
- Gradle error-prone plugin version | Supported Gradle versions
- --------------------------------- | -------------------------
- 0.0.1, 0.0.2                      | 1.8 - 1.11
- 0.0.3                             | 1.8 - 1.12
- 0.0.4                             | 2.1
- 0.0.5                             | 2.2, 2.2.1
+ Gradle error-prone plugin version | Supported Gradle versions | Supported error-prone version | Supported javac version
+ --------------------------------- | ------------------------- | ----------------------------- | -----------------------
+ 0.0.1, 0.0.2                      | 1.8 - 1.11                | 1.+                           | 7
+ 0.0.3                             | 1.8 - 1.12                | 1.+                           | 7
+ 0.0.4                             | 2.1                       | 1.+                           | 7
+ 0.0.5                             | 2.2, 2.2.1                | 1.+                           | 7
 
 _Note: Gradle 2.0 is not supported; it lacks APIs to manipulate the actual
 compiler being used._
