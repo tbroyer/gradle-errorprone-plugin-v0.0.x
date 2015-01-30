@@ -19,6 +19,7 @@ import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.tasks.WorkResult;
 import org.gradle.internal.UncheckedException;
+import org.gradle.internal.jvm.Jvm;
 import org.gradle.language.base.internal.compile.Compiler;
 
 import com.google.common.collect.Iterables;
@@ -57,7 +58,12 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
       Object compilerBuilder = builderClass.newInstance();
       Object compiler = builderClass.getMethod("build").invoke(compilerBuilder);
       Object result = compiler.getClass().getMethod("compile", String[].class).invoke(compiler, (Object) Iterables.toArray(args, String.class));
-      exitCode = result.getClass().getField("exitCode").getInt(result);
+      // error-prone 1.x uses the Javac from the current JDK, which returns an 'int' with a JDK 7
+      if (result instanceof Integer) {
+        exitCode = (Integer) result;
+      } else {
+        exitCode = result.getClass().getField("exitCode").getInt(result);
+      }
     } catch (Exception e) {
       throw UncheckedException.throwAsUncheckedException(e);
     } finally {
@@ -72,9 +78,16 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
 
   private static class SelfFirstClassLoader extends URLClassLoader {
 
-    private static ClassLoader BOOTSTRAP_ONLY_CLASSLOADER = new SecureClassLoader(null) {};
-
+    private static ClassLoader BOOTSTRAP_ONLY_CLASSLOADER;
     static {
+      try {
+        BOOTSTRAP_ONLY_CLASSLOADER = new URLClassLoader(
+            new URL[]{ Jvm.current().getToolsJar().toURI().toURL() },
+            null);
+      } catch (MalformedURLException mue) {
+        throw new RuntimeException(mue.getMessage(), mue);
+      }
+
       ClassLoader.registerAsParallelCapable();
     }
 

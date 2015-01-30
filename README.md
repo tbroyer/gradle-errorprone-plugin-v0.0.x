@@ -19,7 +19,9 @@ It also depends on Javac internal APIs, directly exposed by error-prone.
  0.0.3                             | 1.8 - 1.12                | 1.+                           | 7
  0.0.4                             | 2.1                       | 1.+                           | 7
  0.0.5                             | 2.2, 2.2.1                | 1.+                           | 7
- 0.0.6-SNAPSHOT                    | 2.2, 2.2.1                | 2.+                           | 7, 8
+ 0.0.6-SNAPSHOT                    | 2.2, 2.2.1                | 1.+¹, 2.0                     | 7, 8
+
+¹: error-prone 1.x is only supported with JDK 7
 
 _Note: Gradle 2.0 is not supported; it lacks APIs to manipulate the actual
 compiler being used._
