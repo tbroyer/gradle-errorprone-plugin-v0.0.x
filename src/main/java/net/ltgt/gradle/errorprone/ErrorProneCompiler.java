@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.security.SecureClassLoader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -21,9 +21,6 @@ import org.gradle.api.tasks.WorkResult;
 import org.gradle.internal.UncheckedException;
 import org.gradle.internal.jvm.Jvm;
 import org.gradle.language.base.internal.compile.Compiler;
-
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Iterators;
 
 public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
   private static final Logger LOGGER = Logging.getLogger(ErrorProneCompiler.class);
@@ -51,13 +48,13 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
 
     ClassLoader tccl = Thread.currentThread().getContextClassLoader();
     int exitCode = 0;
-    try (URLClassLoader cl = new SelfFirstClassLoader(Iterables.toArray(urls, URL.class))) {
+    try (URLClassLoader cl = new SelfFirstClassLoader(urls.toArray(new URL[urls.size()]))) {
       Thread.currentThread().setContextClassLoader(cl);
 
       Class<?> builderClass = cl.loadClass("com.google.errorprone.ErrorProneCompiler$Builder");
       Object compilerBuilder = builderClass.newInstance();
       Object compiler = builderClass.getMethod("build").invoke(compilerBuilder);
-      Object result = compiler.getClass().getMethod("compile", String[].class).invoke(compiler, (Object) Iterables.toArray(args, String.class));
+      Object result = compiler.getClass().getMethod("compile", String[].class).invoke(compiler, (Object) args.toArray(new String[args.size()]));
       // error-prone 1.x uses the Javac from the current JDK, which returns an 'int' with a JDK 7
       if (result instanceof Integer) {
         exitCode = (Integer) result;
@@ -132,10 +129,17 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
 
     @Override
     public Enumeration<URL> getResources(String name) throws IOException {
-      return Iterators.asEnumeration(Iterators.concat(
-          Iterators.forEnumeration(findResources(name)),
-          Iterators.forEnumeration(BOOTSTRAP_ONLY_CLASSLOADER.getResources(name))
-      ));
+      Enumeration<URL> selfResources = findResources(name);
+      Enumeration<URL> bootstrapResources = BOOTSTRAP_ONLY_CLASSLOADER.getResources(name);
+      if (!selfResources.hasMoreElements()) {
+        return bootstrapResources;
+      }
+      if (!bootstrapResources.hasMoreElements()) {
+        return selfResources;
+      }
+      ArrayList<URL> resources = Collections.list(selfResources);
+      resources.addAll(Collections.list(bootstrapResources));
+      return Collections.enumeration(resources);
     }
 
     // XXX: we know URLClassLoader#getResourceAsStream calls getResource, so we don't have to override it here.
