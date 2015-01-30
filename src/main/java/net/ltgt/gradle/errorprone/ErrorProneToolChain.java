@@ -15,7 +15,7 @@ import org.gradle.util.TreeVisitor;
 public class ErrorProneToolChain implements JavaToolChainInternal {
 
   public static ErrorProneToolChain create(Project project) {
-    return new ErrorProneToolChain(project.getConfigurations().getByName("errorprone"));
+    return new ErrorProneToolChain(project.getConfigurations().getByName(ErrorProneBasePlugin.CONFIGURATION_NAME));
   }
 
   private final Configuration configuration;
