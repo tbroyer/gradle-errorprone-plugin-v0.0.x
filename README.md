@@ -18,8 +18,9 @@ It also depends on Javac internal APIs, directly exposed by error-prone.
  0.0.1, 0.0.2                      | 1.8 - 1.11                | 1.+                           | 7
  0.0.3                             | 1.8 - 1.12                | 1.+                           | 7
  0.0.4                             | 2.1                       | 1.+                           | 7
- 0.0.5                             | 2.2, 2.2.1, 2.3-rc-1      | 1.+                           | 7
- 0.0.6                             | 2.2, 2.2.1, 2.3-rc-1      | 1.+¹, 2.+                     | 7, 8
+ 0.0.5                             | 2.2 - 2.3-rc-2            | 1.+                           | 7
+ 0.0.6                             | 2.2 - 2.3-rc-2            | 1.+¹, 2.+                     | 7, 8
+ 0.0.7-SNAPSHOT                    | 2.2 - 2.3-rc-2            | 1.+¹, 2.+                     | 7, 8
 
 ¹: error-prone 1.x is only supported with JDK 7
 
