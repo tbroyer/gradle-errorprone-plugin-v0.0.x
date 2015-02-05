@@ -1,7 +1,14 @@
-plugins {
-    id 'java'
-    id 'com.bmuschko.nexus' version '2.0'
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.bmuschko:gradle-nexus-plugin:2.3'
+    }
 }
+apply plugin: 'java'
+apply plugin: 'com.bmuschko.nexus'
 
 group 'net.ltgt.gradle'
 
