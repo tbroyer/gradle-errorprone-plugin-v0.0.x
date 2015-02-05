@@ -66,7 +66,7 @@ public class ErrorPronePluginTest {
   }
 
   @Test
-  public void errorprone20() {
+  public void errorprone201() {
     Project project = ProjectBuilder.builder()
         .withProjectDir(new File("integrationTests/success"))
         .build();
@@ -74,7 +74,7 @@ public class ErrorPronePluginTest {
     project.apply(Collections.singletonMap("plugin", ErrorPronePlugin.class));
     project.getRepositories().mavenCentral();
     project.getConfigurations().getByName(ErrorProneBasePlugin.CONFIGURATION_NAME).getResolutionStrategy()
-        .force("com.google.errorprone:error_prone_core:2.0");
+        .force("com.google.errorprone:error_prone_core:2.0.1");
 
     final AbstractTask compileJavaTask = (AbstractTask) project.getTasks().getByName("compileJava");
     compileJavaTask.execute();
