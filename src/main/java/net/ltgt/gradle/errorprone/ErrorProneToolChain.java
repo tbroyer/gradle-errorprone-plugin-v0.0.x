@@ -45,11 +45,15 @@ public class ErrorProneToolChain implements JavaToolChainInternal {
 
   private class JavaToolProvider implements ToolProvider {
     @SuppressWarnings("unchecked")
-    public <T extends CompileSpec> Compiler<T> newCompiler(T spec) {
-      if (spec instanceof JavaCompileSpec) {
+    public <T extends CompileSpec> Compiler<T> newCompiler(Class<T> spec) {
+      if (JavaCompileSpec.class.isAssignableFrom(spec)) {
         return (Compiler<T>) new NormalizingJavaCompiler(new ErrorProneCompiler(configuration));
       }
       throw new IllegalArgumentException(String.format("Don't know how to compile using spec of type %s.", spec.getClass().getSimpleName()));
+    }
+
+    public <T> T get(Class<T> toolType) {
+      throw new IllegalArgumentException(String.format("Don\'t know how to provide tool of type %s.", toolType.getSimpleName()));
     }
 
     public boolean isAvailable() {
@@ -67,8 +71,12 @@ public class ErrorProneToolChain implements JavaToolChainInternal {
       this.targetPlatform = targetPlatform;
     }
 
-    public <T extends CompileSpec> Compiler<T> newCompiler(T spec) {
+    public <T extends CompileSpec> Compiler<T> newCompiler(Class<T> spec) {
       throw new IllegalArgumentException(getMessage());
+    }
+
+    public <T> T get(Class<T> toolType) {
+      throw new IllegalArgumentException(String.format("Don\'t know how to provide tool of type %s.", toolType.getSimpleName()));
     }
 
     public boolean isAvailable() {

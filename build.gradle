@@ -19,8 +19,8 @@ dependencies {
     compile localGroovy()
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.3'
+wrapper {
+  gradleVersion = "2.4-rc-1"
 }
 
 test {
