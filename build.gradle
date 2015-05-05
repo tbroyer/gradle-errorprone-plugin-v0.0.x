@@ -17,9 +17,11 @@ sourceCompatibility = targetCompatibility = 1.7
 
 gradle.taskGraph.whenReady { graph ->
     if (graph.hasTask(publishPlugins)) {
-        assert 'git diff --quiet --exit-code'.execute(null, rootDir).waitFor() == 0
+        assert JavaVersion.current() == JavaVersion.VERSION_1_7 : "Releases must be built with JDK 7 (make sure to clean and rebuild after changing JDK)"
+
+        assert 'git diff --quiet --exit-code'.execute(null, rootDir).waitFor() == 0 : "Working tree is dirty"
         def process ='git describe --exact-match'.execute(null, rootDir)
-        assert process.waitFor() == 0
+        assert process.waitFor() == 0 : "Version is not tagged"
         version = process.text.trim() - ~'^v'
     }
 }
