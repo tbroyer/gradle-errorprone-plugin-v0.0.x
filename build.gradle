@@ -46,7 +46,7 @@ test {
 pluginBundle {
     website = 'https://github.com/tbroyer/gradle-errorprone-plugin'
     vcsUrl = 'https://github.com/tbroyer/gradle-errorprone-plugin'
-    description = 'Gradle plugin making it easier/safer to use Java annotation processors'
+    description = 'Gradle plugin to use the error-prone compiler for Java'
     tags = [ 'javac', 'error-prone' ]
 
     plugins {
