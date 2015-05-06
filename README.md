@@ -35,14 +35,16 @@ To use the error-prone plugin, first add it to your project:
 ```groovy
 buildscript {
   repositories {
-    mavenCentral()
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
   }
   dependencies {
     classpath 'net.ltgt.gradle:gradle-errorprone-plugin:latest.release'
   }
 }
 
-apply plugin: 'errorprone'
+apply plugin: 'net.ltgt.errorprone'
 ```
 
 then make sure you have a `repository` configured that contains the
@@ -54,10 +56,11 @@ repositories {
 }
 ```
 
-When applied, the `errorprone` plugin automatically  changes all `JavaCompile` tasks in
+When applied, the `net.ltgt.errorprone` plugin automatically  changes all `JavaCompile` tasks in
 the project to use the error-prone compiler.
+(Note: earlier versions used `errorprone` as the plugin identifier instead of `net.ltgt.errorprone`.)
 
-The plugin adds an `errorprone` configuration that automatically uses the latest
+The plugin adds an `net.ltgt.errorprone` configuration that automatically uses the latest
 release of error-prone. You can override it to use a specific version with:
 
 ```groovy
@@ -81,7 +84,7 @@ configurations.all {
 Advanced usage
 --------------
 
-If you want more control as to which task to change, you can apply the `errorprone-base`
+If you want more control as to which task to change, you can apply the `net.ltgt.errorprone-base`
 plugin instead, which doesn't reconfigure any task. You'll then configure each task as
 follows (using the `compileJava` task as an example):
 
