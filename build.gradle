@@ -9,7 +9,8 @@ buildscript {
     }
 }
 apply plugin: "com.gradle.plugin-publish"
-apply plugin: 'java'
+apply plugin: 'java-gradle-plugin'
+apply plugin: 'groovy'
 
 group 'net.ltgt.gradle'
 
@@ -26,9 +27,17 @@ gradle.taskGraph.whenReady { graph ->
     }
 }
 
+repositories {
+    jcenter()
+}
 dependencies {
     compile gradleApi()
-    compile localGroovy()
+
+    testCompile localGroovy()
+    testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
+        exclude group: 'org.codehaus.groovy'
+    }
+    testCompile gradleTestKit()
 }
 
 wrapper {
@@ -36,6 +45,8 @@ wrapper {
 }
 
 test {
+    inputs.file tasks.jar
+    systemProperty("plugin", tasks.jar.archivePath)
     testLogging {
         showExceptions = true
         showStackTraces = true
