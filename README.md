@@ -22,6 +22,7 @@ It also depends on Javac internal APIs, directly exposed by error-prone.
  0.0.6                             | 2.2 - 2.3                 | 1.+¹, 2.+                     | 7, 8
  0.0.7, 0.0.7.1                    | 2.4 - 2.5                 | 1.+¹, 2.+                     | 7, 8
  0.0.8                             | 2.6 - 2.11                | 1.+¹, 2.+                     | 7, 8
+ _master_                          | 2.6 - 2.11                | 1.+¹, 2.+                     | 7, 8
 
 ¹: error-prone 1.x is only supported with JDK 7
 
@@ -52,14 +53,34 @@ The plugin adds an `errorprone` configuration that automatically uses the latest
 You can override it to use a specific version with:
 
 ```groovy
-configurations.errorprone {
-  resolutionStrategy.force 'com.google.errorprone:error_prone_core:1.0.8-patched'
+dependencies {
+  // 2.0.5 is the last version compatible with JDK 7
+  errorprone 'com.google.errorprone:error_prone_core:2.0.5'
 }
 ```
 
-or if you changed the groupId of your fork:
+or, for versions of the plugin before (and including) 0.0.8:
 
 ```groovy
+configurations.errorprone {
+  // 2.0.5 is the last version compatible with JDK 7
+  resolutionStrategy.force 'com.google.errorprone:error_prone_core:2.0.5'
+}
+```
+
+If you forked error-prone and changed the `groupId`, the syntax may vary (depending on the version of the plugin):
+
+```groovy
+dependencies {
+  // Use my.company fork of error-prone
+  errorprone "my.company.errorprone:error_prone_core:latest.release"
+}
+```
+
+or
+
+```groovy
+// Use my.company fork of error-prone
 configurations.errorprone {
   resolutionStrategy.eachDependency { DependencyResolveDetails details ->
     if (details.requested.group == 'com.google.errorprone') {
