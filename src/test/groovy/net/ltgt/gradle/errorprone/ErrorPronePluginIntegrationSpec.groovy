@@ -55,7 +55,7 @@ class ErrorPronePluginIntegrationSpec extends Specification {
     result.task(':compileJava').outcome == TaskOutcome.SUCCESS
 
     where:
-    gradleVersion << ['2.6', '2.7', '2.8', '2.9', '2.10']
+    gradleVersion << ['2.6', '2.7', '2.8', '2.9', '2.10', '2.11']
   }
 
   @Unroll
@@ -78,7 +78,7 @@ class ErrorPronePluginIntegrationSpec extends Specification {
     result.output.contains("Failure.java:6: error: [ArrayEquals]")
 
     where:
-    gradleVersion << ['2.6', '2.7', '2.8', '2.9', '2.10']
+    gradleVersion << ['2.6', '2.7', '2.8', '2.9', '2.10', '2.11']
   }
 
   def "compatible with errorprone 1.x"() {
