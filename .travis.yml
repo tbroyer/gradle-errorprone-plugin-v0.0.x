@@ -24,9 +24,10 @@ matrix:
       env: TEST_GRADLE_VERSIONS=2.14
 install: true
 script: ./gradlew build -Ptest.gradle-versions="$TEST_GRADLE_VERSIONS"
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
 cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
-    - $HOME/.gradle/native/
-    - $HOME/.gradle/daemon/native/
