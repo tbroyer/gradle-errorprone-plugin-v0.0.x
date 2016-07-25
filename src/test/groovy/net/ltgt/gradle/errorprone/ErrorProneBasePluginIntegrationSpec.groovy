@@ -15,7 +15,7 @@ class ErrorProneBasePluginIntegrationSpec extends Specification {
     buildFile << """\
       buildscript {
         dependencies {
-          classpath files('${System.getProperty('plugin')}')
+          classpath files(\$/${System.getProperty('plugin')}/\$)
         }
       }
       apply plugin: 'net.ltgt.errorprone-base'
