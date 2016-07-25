@@ -1,6 +1,5 @@
 package net.ltgt.gradle.errorprone
 
-import org.apache.commons.io.FileUtils
 import org.gradle.internal.jvm.Jvm
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
@@ -41,7 +40,7 @@ class ErrorPronePluginIntegrationSpec extends Specification {
     given:
     def f = new File(testProjectDir.newFolder('src', 'main', 'java', 'test'), 'Success.java')
     f.createNewFile()
-    FileUtils.copyURLToFile(getClass().getResource("/test/Success.java"), f)
+    getClass().getResource("/test/Success.java").withInputStream { f << it }
 
     when:
     def result = GradleRunner.create()
@@ -55,7 +54,7 @@ class ErrorPronePluginIntegrationSpec extends Specification {
     result.task(':compileJava').outcome == TaskOutcome.SUCCESS
 
     where:
-    gradleVersion << ['2.6', '2.7', '2.8', '2.9', '2.10', '2.11','2.12','2.13']
+    gradleVersion << ['2.6', '2.7', '2.8', '2.9', '2.10', '2.11','2.12','2.13','2.14']
   }
 
   @Unroll
@@ -63,7 +62,7 @@ class ErrorPronePluginIntegrationSpec extends Specification {
     given:
     def f = new File(testProjectDir.newFolder('src', 'main', 'java', 'test'), 'Failure.java')
     f.createNewFile()
-    FileUtils.copyURLToFile(getClass().getResource("/test/Failure.java"), f)
+    getClass().getResource("/test/Failure.java").withInputStream { f << it }
 
     when:
     def result = GradleRunner.create()
@@ -78,7 +77,7 @@ class ErrorPronePluginIntegrationSpec extends Specification {
     result.output.contains("Failure.java:6: error: [ArrayEquals]")
 
     where:
-    gradleVersion << ['2.6', '2.7', '2.8', '2.9', '2.10', '2.11','2.12','2.13']
+    gradleVersion << ['2.6', '2.7', '2.8', '2.9', '2.10', '2.11','2.12','2.13','2.14']
   }
 
   def "compatible with errorprone 1.x"() {
@@ -94,7 +93,7 @@ class ErrorPronePluginIntegrationSpec extends Specification {
 
     def f = new File(testProjectDir.newFolder('src', 'main', 'java', 'test'), 'Success.java')
     f.createNewFile()
-    FileUtils.copyURLToFile(getClass().getResource("/test/Success.java"), f)
+    getClass().getResource("/test/Success.java").withInputStream { f << it }
 
     when:
     def result = GradleRunner.create()

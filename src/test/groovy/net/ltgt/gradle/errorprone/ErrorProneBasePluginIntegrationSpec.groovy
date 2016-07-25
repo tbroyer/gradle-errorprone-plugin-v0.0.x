@@ -1,6 +1,5 @@
 package net.ltgt.gradle.errorprone
 
-import org.apache.commons.io.FileUtils
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Rule
@@ -34,10 +33,10 @@ class ErrorProneBasePluginIntegrationSpec extends Specification {
     def p = testProjectDir.newFolder('src', 'main', 'java', 'test')
     def f = new File(p, 'Success.java')
     f.createNewFile()
-    FileUtils.copyURLToFile(getClass().getResource("/test/Success.java"), f)
+    getClass().getResource("/test/Success.java").withInputStream { f << it }
     f = new File(p, 'Failure.java')
     f.createNewFile()
-    FileUtils.copyURLToFile(getClass().getResource("/test/Failure.java"), f)
+    getClass().getResource("/test/Failure.java").withInputStream { f << it }
   }
 
   def "compilation succeeds even when code violates pattern, because Error Prone is not used"() {
