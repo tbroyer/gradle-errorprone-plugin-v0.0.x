@@ -5,7 +5,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath "com.gradle.publish:plugin-publish-plugin:0.9.1"
+        classpath "com.gradle.publish:plugin-publish-plugin:0.9.5"
     }
 }
 apply plugin: "com.gradle.plugin-publish"
@@ -42,7 +42,7 @@ dependencies {
 }
 
 wrapper {
-  gradleVersion = "2.14"
+  gradleVersion = "3.0-rc-1"
 }
 
 test {
