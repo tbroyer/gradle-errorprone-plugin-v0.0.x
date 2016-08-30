@@ -52,7 +52,7 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
       Thread.currentThread().setContextClassLoader(cl);
 
       Class<?> builderClass = cl.loadClass("com.google.errorprone.ErrorProneCompiler$Builder");
-      Object compilerBuilder = builderClass.newInstance();
+      Object compilerBuilder = builderClass.getConstructor().newInstance();
       Object compiler = builderClass.getMethod("build").invoke(compilerBuilder);
       Object result = compiler.getClass().getMethod("compile", String[].class).invoke(compiler, (Object) args.toArray(new String[args.size()]));
       // error-prone 1.x uses the Javac from the current JDK, which returns an 'int' with a JDK 7
