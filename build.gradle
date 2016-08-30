@@ -16,9 +16,13 @@ group 'net.ltgt.gradle'
 
 sourceCompatibility = targetCompatibility = 1.7
 
+if (JavaVersion.current().isJava9Compatible()) {
+    tasks.withType(JavaCompile).all { options.compilerArgs.addAll(['-release', '7']) }
+    tasks.withType(GroovyCompile).all { options.compilerArgs.addAll(['-release', '7']) }
+}
 gradle.taskGraph.whenReady { graph ->
     if (graph.hasTask(publishPlugins)) {
-        assert JavaVersion.current() == JavaVersion.VERSION_1_7 : "Releases must be built with JDK 7 (make sure to clean and rebuild after changing JDK)"
+        assert JavaVersion.current().isJava7() || JavaVersion.current().isJava9Compatible() : "Releases must be built with JDK 7 or JDK 9 (make sure to clean and rebuild after changing JDK)"
 
         assert 'git diff --quiet --exit-code'.execute(null, rootDir).waitFor() == 0 : "Working tree is dirty"
         def process ='git describe --exact-match'.execute(null, rootDir)
