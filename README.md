@@ -49,6 +49,15 @@ When applied, the `net.ltgt.errorprone` plugin automatically  changes all `JavaC
 the project to use the error-prone compiler.
 (Note: earlier versions used `errorprone` as the plugin identifier instead of `net.ltgt.errorprone`.)
 
+You can configure the error-prone compiler using the `JavaCompile`'s `options.compilerArgs`,
+for example:
+
+```groovy
+tasks.withType(JavaCompile) {
+  options.compilerArgs += [ '-Xep:DeadException:WARN', '-Xep:GuardedByValidator:OFF' ]
+}
+```
+
 The plugin adds an `errorprone` configuration that automatically uses the latest release of error-prone.
 You can override it to use a specific version with:
 
