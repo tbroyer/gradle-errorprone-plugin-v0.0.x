@@ -23,7 +23,9 @@ matrix:
     - jdk: oraclejdk8
       env: TEST_GRADLE_VERSIONS=2.14
     - jdk: oraclejdk8
-      env: TEST_GRADLE_VERSIONS=3.0-rc-1
+      env: TEST_GRADLE_VERSIONS=3.0
+    - jdk: oraclejdk8
+      env: TEST_GRADLE_VERSIONS=3.1
 install: true
 script: ./gradlew build -Ptest.gradle-versions="$TEST_GRADLE_VERSIONS"
 before_cache:
