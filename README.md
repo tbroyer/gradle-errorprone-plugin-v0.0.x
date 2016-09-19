@@ -49,7 +49,7 @@ When applied, the `net.ltgt.errorprone` plugin automatically  changes all `JavaC
 the project to use the error-prone compiler.
 (Note: earlier versions used `errorprone` as the plugin identifier instead of `net.ltgt.errorprone`.)
 
-You can configure the error-prone compiler using the `JavaCompile`'s `options.compilerArgs`,
+You can [configure the error-prone compiler](http://errorprone.info/docs/flags) using the `JavaCompile`'s `options.compilerArgs`,
 for example:
 
 ```groovy
