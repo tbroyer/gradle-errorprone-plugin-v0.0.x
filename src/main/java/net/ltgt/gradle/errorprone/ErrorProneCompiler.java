@@ -46,6 +46,12 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
       throw new RuntimeException(mue.getMessage(), mue);
     }
 
+    if (Jvm.current().getToolsJar() == null) {
+      throw new IllegalStateException("Could not find tools.jar. Please check that "
+          + Jvm.current().getJavaHome().getAbsolutePath()
+          + " contains a valid (and compatible) JDK installation.");
+    }
+
     ClassLoader tccl = Thread.currentThread().getContextClassLoader();
     int exitCode = 0;
     try (URLClassLoader cl = new SelfFirstClassLoader(urls.toArray(new URL[urls.size()]))) {
