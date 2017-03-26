@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
-
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.internal.tasks.SimpleWorkResult;
 import org.gradle.api.internal.tasks.compile.CompilationFailedException;
@@ -47,9 +46,10 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
     }
 
     if (Jvm.current().getToolsJar() == null) {
-      throw new IllegalStateException("Could not find tools.jar. Please check that "
-          + Jvm.current().getJavaHome().getAbsolutePath()
-          + " contains a valid (and compatible) JDK installation.");
+      throw new IllegalStateException(
+          "Could not find tools.jar. Please check that "
+              + Jvm.current().getJavaHome().getAbsolutePath()
+              + " contains a valid (and compatible) JDK installation.");
     }
 
     ClassLoader tccl = Thread.currentThread().getContextClassLoader();
@@ -60,7 +60,11 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
       Class<?> builderClass = cl.loadClass("com.google.errorprone.ErrorProneCompiler$Builder");
       Object compilerBuilder = builderClass.getConstructor().newInstance();
       Object compiler = builderClass.getMethod("build").invoke(compilerBuilder);
-      Object result = compiler.getClass().getMethod("compile", String[].class).invoke(compiler, (Object) args.toArray(new String[args.size()]));
+      Object result =
+          compiler
+              .getClass()
+              .getMethod("compile", String[].class)
+              .invoke(compiler, (Object) args.toArray(new String[args.size()]));
       // error-prone 1.x uses the Javac from the current JDK, which returns an 'int' with a JDK 7
       if (result instanceof Integer) {
         exitCode = (Integer) result;
@@ -82,11 +86,11 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
   private static class SelfFirstClassLoader extends URLClassLoader {
 
     private static ClassLoader BOOTSTRAP_ONLY_CLASSLOADER;
+
     static {
       try {
-        BOOTSTRAP_ONLY_CLASSLOADER = new URLClassLoader(
-            new URL[]{ Jvm.current().getToolsJar().toURI().toURL() },
-            null);
+        BOOTSTRAP_ONLY_CLASSLOADER =
+            new URLClassLoader(new URL[] {Jvm.current().getToolsJar().toURI().toURL()}, null);
       } catch (MalformedURLException mue) {
         throw new RuntimeException(mue.getMessage(), mue);
       }

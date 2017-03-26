@@ -7,6 +7,7 @@ buildscript {
     dependencies {
         classpath "com.gradle.publish:plugin-publish-plugin:0.9.5"
         classpath "net.ltgt.gradle:gradle-errorprone-plugin:0.0.9"
+        classpath "gradle.plugin.com.github.sherter.google-java-format:google-java-format-gradle-plugin:0.6"
     }
 }
 apply plugin: "com.gradle.plugin-publish"
@@ -16,6 +17,11 @@ if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
     apply plugin: 'net.ltgt.errorprone'
     dependencies {
         errorprone 'com.google.errorprone:error_prone_core:2.0.19'
+    }
+
+    apply plugin: 'com.github.sherter.google-java-format'
+    googleJavaFormat {
+        toolVersion = '1.3'
     }
 }
 

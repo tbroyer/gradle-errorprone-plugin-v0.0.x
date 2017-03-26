@@ -15,7 +15,8 @@ import org.gradle.util.TreeVisitor;
 public class ErrorProneToolChain implements JavaToolChainInternal {
 
   public static ErrorProneToolChain create(Project project) {
-    return new ErrorProneToolChain(project.getConfigurations().getByName(ErrorProneBasePlugin.CONFIGURATION_NAME));
+    return new ErrorProneToolChain(
+        project.getConfigurations().getByName(ErrorProneBasePlugin.CONFIGURATION_NAME));
   }
 
   private final Configuration configuration;
@@ -30,12 +31,12 @@ public class ErrorProneToolChain implements JavaToolChainInternal {
     return String.format("ErrorProneJDK%s", javaVersion);
   }
 
-//  @Override
+  // @Override
   public String getVersion() {
     return this.javaVersion.getMajorVersion();
   }
 
-//  @Override
+  // @Override
   public JavaVersion getJavaVersion() {
     return this.javaVersion;
   }
@@ -47,7 +48,8 @@ public class ErrorProneToolChain implements JavaToolChainInternal {
 
   @Override
   public ToolProvider select(JavaPlatform targetPlatform) {
-    if (targetPlatform != null && targetPlatform.getTargetCompatibility().compareTo(javaVersion) > 0) {
+    if (targetPlatform != null
+        && targetPlatform.getTargetCompatibility().compareTo(javaVersion) > 0) {
       return new UnavailableToolProvider(targetPlatform);
     }
     return new JavaToolProvider();
@@ -60,12 +62,14 @@ public class ErrorProneToolChain implements JavaToolChainInternal {
       if (JavaCompileSpec.class.isAssignableFrom(spec)) {
         return (Compiler<T>) new NormalizingJavaCompiler(new ErrorProneCompiler(configuration));
       }
-      throw new IllegalArgumentException(String.format("Don't know how to compile using spec of type %s.", spec.getSimpleName()));
+      throw new IllegalArgumentException(
+          String.format("Don't know how to compile using spec of type %s.", spec.getSimpleName()));
     }
 
     @Override
     public <T> T get(Class<T> toolType) {
-      throw new IllegalArgumentException(String.format("Don\'t know how to provide tool of type %s.", toolType.getSimpleName()));
+      throw new IllegalArgumentException(
+          String.format("Don\'t know how to provide tool of type %s.", toolType.getSimpleName()));
     }
 
     @Override
@@ -74,8 +78,7 @@ public class ErrorProneToolChain implements JavaToolChainInternal {
     }
 
     @Override
-    public void explain(TreeVisitor<? super String> visitor) {
-    }
+    public void explain(TreeVisitor<? super String> visitor) {}
   }
 
   private class UnavailableToolProvider implements ToolProvider {
@@ -92,7 +95,8 @@ public class ErrorProneToolChain implements JavaToolChainInternal {
 
     @Override
     public <T> T get(Class<T> toolType) {
-      throw new IllegalArgumentException(String.format("Don\'t know how to provide tool of type %s.", toolType.getSimpleName()));
+      throw new IllegalArgumentException(
+          String.format("Don\'t know how to provide tool of type %s.", toolType.getSimpleName()));
     }
 
     @Override
@@ -106,7 +110,9 @@ public class ErrorProneToolChain implements JavaToolChainInternal {
     }
 
     private String getMessage() {
-      return String.format("Could not target platform: '%s' using tool chain: '%s'.", targetPlatform.getDisplayName(), ErrorProneToolChain.this.getDisplayName());
+      return String.format(
+          "Could not target platform: '%s' using tool chain: '%s'.",
+          targetPlatform.getDisplayName(), ErrorProneToolChain.this.getDisplayName());
     }
   }
 }
