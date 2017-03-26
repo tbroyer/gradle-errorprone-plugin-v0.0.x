@@ -6,11 +6,18 @@ buildscript {
     }
     dependencies {
         classpath "com.gradle.publish:plugin-publish-plugin:0.9.5"
+        classpath "net.ltgt.gradle:gradle-errorprone-plugin:0.0.9"
     }
 }
 apply plugin: "com.gradle.plugin-publish"
 apply plugin: 'java-gradle-plugin'
 apply plugin: 'groovy'
+if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
+    apply plugin: 'net.ltgt.errorprone'
+    dependencies {
+        errorprone 'com.google.errorprone:error_prone_core:2.0.19'
+    }
+}
 
 group 'net.ltgt.gradle'
 

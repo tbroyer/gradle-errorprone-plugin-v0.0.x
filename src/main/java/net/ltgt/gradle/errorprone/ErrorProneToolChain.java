@@ -55,21 +55,25 @@ public class ErrorProneToolChain implements JavaToolChainInternal {
 
   private class JavaToolProvider implements ToolProvider {
     @SuppressWarnings("unchecked")
+    @Override
     public <T extends CompileSpec> Compiler<T> newCompiler(Class<T> spec) {
       if (JavaCompileSpec.class.isAssignableFrom(spec)) {
         return (Compiler<T>) new NormalizingJavaCompiler(new ErrorProneCompiler(configuration));
       }
-      throw new IllegalArgumentException(String.format("Don't know how to compile using spec of type %s.", spec.getClass().getSimpleName()));
+      throw new IllegalArgumentException(String.format("Don't know how to compile using spec of type %s.", spec.getSimpleName()));
     }
 
+    @Override
     public <T> T get(Class<T> toolType) {
       throw new IllegalArgumentException(String.format("Don\'t know how to provide tool of type %s.", toolType.getSimpleName()));
     }
 
+    @Override
     public boolean isAvailable() {
       return true;
     }
 
+    @Override
     public void explain(TreeVisitor<? super String> visitor) {
     }
   }
@@ -81,18 +85,22 @@ public class ErrorProneToolChain implements JavaToolChainInternal {
       this.targetPlatform = targetPlatform;
     }
 
+    @Override
     public <T extends CompileSpec> Compiler<T> newCompiler(Class<T> spec) {
       throw new IllegalArgumentException(getMessage());
     }
 
+    @Override
     public <T> T get(Class<T> toolType) {
       throw new IllegalArgumentException(String.format("Don\'t know how to provide tool of type %s.", toolType.getSimpleName()));
     }
 
+    @Override
     public boolean isAvailable() {
       return false;
     }
 
+    @Override
     public void explain(TreeVisitor<? super String> visitor) {
       visitor.node(getMessage());
     }
