@@ -23,9 +23,11 @@ It also depends on Javac internal APIs, directly exposed by error-prone.
  0.0.7, 0.0.7.1                    | 2.4 - 2.5                 | 1.+¹, 2.+                     | 7, 8
  0.0.8                             | 2.6 - 2.14, 3.0 - 3.4     | 1.+¹, 2.+                     | 7, 8
  0.0.9                             | 2.6 - 2.14, 3.0 - 3.4     | 1.+¹, 2.+                     | 7, 8
- _master_                          | 2.6 - 2.14, 3.0 - 3.4     | 1.+¹, 2.+                     | 7, 8
+ _master_                          | 2.6 - 2.14, 3.0 - 3.5²    | 1.+¹, 2.+                     | 7, 8
 
-¹: error-prone 1.x is only supported with JDK 7
+¹: error-prone 1.x is only supported with JDK 7  
+²: Gradle 3.5-rc-1 is not supported; it removed the APIs this plugin uses,
+they've been reintroduced in 3.5-rc-2.
 
 _Note: Gradle 2.0 is not supported; it lacks APIs to manipulate the actual
 compiler being used._

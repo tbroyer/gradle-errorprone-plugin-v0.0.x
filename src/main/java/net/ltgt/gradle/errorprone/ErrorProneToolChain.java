@@ -31,12 +31,12 @@ public class ErrorProneToolChain implements JavaToolChainInternal {
     return String.format("ErrorProneJDK%s", javaVersion);
   }
 
-  // @Override
+  @Override
   public String getVersion() {
     return this.javaVersion.getMajorVersion();
   }
 
-  // @Override
+  @Override
   public JavaVersion getJavaVersion() {
     return this.javaVersion;
   }
