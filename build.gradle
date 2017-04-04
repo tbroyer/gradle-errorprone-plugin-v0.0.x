@@ -10,7 +10,7 @@ buildscript {
     dependencies {
         classpath "com.gradle.publish:plugin-publish-plugin:0.9.5"
         //classpath "net.ltgt.gradle:gradle-errorprone-plugin:0.0.9"
-        classpath "com.github.tbroyer:gradle-errorprone-plugin:052a7aedb2"
+        classpath "com.github.tbroyer:gradle-errorprone-plugin:0c76d1a130"
         classpath "gradle.plugin.com.github.sherter.google-java-format:google-java-format-gradle-plugin:0.6"
     }
 }
@@ -63,7 +63,7 @@ dependencies {
 }
 
 wrapper {
-  gradleVersion = "3.5-rc-2"
+  gradleVersion = "3.5"
 }
 
 test {
