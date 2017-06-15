@@ -3,7 +3,7 @@ sudo: false
 matrix:
   include:
     - jdk: openjdk7
-      env: TEST_GRADLE_VERSIONS=3.5
+      env: TEST_GRADLE_VERSIONS=4.0
     - jdk: oraclejdk8
       env: TEST_GRADLE_VERSIONS=2.6
     - jdk: oraclejdk8
@@ -34,6 +34,8 @@ matrix:
       env: TEST_GRADLE_VERSIONS=3.4
     - jdk: oraclejdk8
       env: TEST_GRADLE_VERSIONS=3.5
+    - jdk: oraclejdk8
+      env: TEST_GRADLE_VERSIONS=4.0
 install: true
 script: ./gradlew build -Ptest.gradle-versions="$TEST_GRADLE_VERSIONS"
 before_cache:
