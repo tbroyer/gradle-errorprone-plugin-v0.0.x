@@ -9,13 +9,13 @@ class ErrorPronePluginSpec extends PluginProjectSpec {
   }
 
 
-  def 'should apply errorprone-base plugin'() {
+  def 'should apply net.ltgt.errorprone-base plugin'() {
     when:
     project.apply plugin: pluginName
     project.evaluate()
 
     then:
-    project.plugins.hasPlugin('errorprone-base')
+    project.plugins.hasPlugin('net.ltgt.errorprone-base')
     project.configurations.findByName('errorprone')
   }
 
@@ -26,7 +26,7 @@ class ErrorPronePluginSpec extends PluginProjectSpec {
     project.evaluate()
 
     then:
-    project.plugins.hasPlugin('errorprone-base')
+    project.plugins.hasPlugin('net.ltgt.errorprone-base')
     project.configurations.findByName('errorprone')
     project.tasks.withType(JavaCompile).all { it.toolChain instanceof ErrorProneToolChain }
   }
