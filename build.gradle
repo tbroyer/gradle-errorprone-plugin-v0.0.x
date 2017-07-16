@@ -88,9 +88,13 @@ pluginBundle {
     tags = [ 'javac', 'error-prone' ]
 
     plugins {
-        aptPlugin {
+        errorpronePlugin {
             id = 'net.ltgt.errorprone'
             displayName = 'Gradle error-prone plugin'
+        }
+        errorproneBasePlugin {
+            id = 'net.ltgt.errorprone-base'
+            displayName = 'Gradle error-prone base plugin'
         }
     }
 
