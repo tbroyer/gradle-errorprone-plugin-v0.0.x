@@ -51,14 +51,11 @@ repositories {
     jcenter()
 }
 dependencies {
-    compile gradleApi()
-
     testCompile localGroovy()
     testCompile 'com.netflix.nebula:nebula-test:4.0.0'
     testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
         exclude group: 'org.codehaus.groovy'
     }
-    testCompile gradleTestKit()
 }
 
 wrapper {
@@ -78,6 +75,19 @@ test {
         showExceptions = true
         showStackTraces = true
         exceptionFormat = 'FULL'
+    }
+}
+
+gradlePlugin {
+    plugins {
+        errorpronePlugin {
+            id = 'net.ltgt.errorprone'
+            implementationClass = 'net.ltgt.gradle.errorprone.ErrorPronePlugin'
+        }
+        errorproneBasePlugin {
+            id = 'net.ltgt.errorprone-base'
+            implementationClass = 'net.ltgt.gradle.errorprone.ErrorProneBasePlugin'
+        }
     }
 }
 
