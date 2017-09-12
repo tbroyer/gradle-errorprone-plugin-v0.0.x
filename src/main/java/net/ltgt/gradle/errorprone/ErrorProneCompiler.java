@@ -152,6 +152,7 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
       return Collections.enumeration(resources);
     }
 
-    // XXX: we know URLClassLoader#getResourceAsStream calls getResource, so we don't have to override it here.
+    // XXX: we know URLClassLoader#getResourceAsStream calls getResource, so we don't have to
+    // override it here.
   }
 }
