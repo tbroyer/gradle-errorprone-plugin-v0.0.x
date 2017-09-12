@@ -38,7 +38,10 @@ matrix:
       env: TEST_GRADLE_VERSIONS=4.0
     - jdk: oraclejdk8
       env: TEST_GRADLE_VERSIONS=4.1
-install: true
+install:
+  # Workaround for openjdk7 package missing SunEC, to talk to *.gradle.org through TLS
+  # Download Gradle distribution (services.gradle.org) and plugins (plugins.gradle.org) using openjdk8
+  - JAVA_HOME=$(jdk_switcher home openjdk8) ./gradlew classes testClasses clean
 script: ./gradlew build -Ptest.gradle-versions="$TEST_GRADLE_VERSIONS"
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
