@@ -58,10 +58,6 @@ dependencies {
     }
 }
 
-wrapper {
-  gradleVersion = "4.0"
-}
-
 test {
     inputs.file tasks.jar
     inputs.property "test.gradle-versions", project.findProperty("test.gradle-versions")
