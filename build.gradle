@@ -30,16 +30,14 @@ if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
 
 group 'net.ltgt.gradle'
 
-sourceCompatibility = targetCompatibility = 1.7
+sourceCompatibility = targetCompatibility = 1.8
 
 if (JavaVersion.current().isJava9Compatible()) {
-    tasks.withType(JavaCompile).all { options.compilerArgs.addAll(['-release', '7']) }
-    tasks.withType(GroovyCompile).all { options.compilerArgs.addAll(['-release', '7']) }
+    tasks.withType(JavaCompile).all { options.compilerArgs.addAll(['-release', '8']) }
+    tasks.withType(GroovyCompile).all { options.compilerArgs.addAll(['-release', '8']) }
 }
 gradle.taskGraph.whenReady { graph ->
     if (graph.hasTask(publishPlugins)) {
-        assert JavaVersion.current().isJava7() || JavaVersion.current().isJava9Compatible() : "Releases must be built with JDK 7 or JDK 9 (make sure to clean and rebuild after changing JDK)"
-
         assert 'git diff --quiet --exit-code'.execute(null, rootDir).waitFor() == 0 : "Working tree is dirty"
         def process ='git describe --exact-match'.execute(null, rootDir)
         assert process.waitFor() == 0 : "Version is not tagged"

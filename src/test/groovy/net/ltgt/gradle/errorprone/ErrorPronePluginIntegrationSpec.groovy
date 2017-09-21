@@ -29,8 +29,7 @@ class ErrorPronePluginIntegrationSpec extends Specification {
         mavenCentral()
       }
       dependencies {
-        // 2.0.5 is compatible with JDK 7 (2.0.6 is not)
-        errorprone 'com.google.errorprone:error_prone_core:2.0.5'
+        errorprone 'com.google.errorprone:error_prone_core:2.1.1'
       }
 """.stripIndent()
   }

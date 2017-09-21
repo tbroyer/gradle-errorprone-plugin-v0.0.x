@@ -1,10 +1,7 @@
 package net.ltgt.gradle.errorprone;
 
-import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.DependencySet;
 
 public class ErrorProneBasePlugin implements Plugin<Project> {
 
@@ -19,18 +16,11 @@ public class ErrorProneBasePlugin implements Plugin<Project> {
         .getConfigurations()
         .create(
             CONFIGURATION_NAME,
-            new Action<Configuration>() {
-              @Override
-              public void execute(Configuration files) {
-                files.setVisible(false);
-                files.defaultDependencies(
-                    new Action<DependencySet>() {
-                      @Override
-                      public void execute(DependencySet dependencies) {
-                        dependencies.add(project.getDependencies().create(DEFAULT_DEPENDENCY));
-                      }
-                    });
-              }
+            files -> {
+              files.setVisible(false);
+              files.defaultDependencies(
+                  dependencies ->
+                      dependencies.add(project.getDependencies().create(DEFAULT_DEPENDENCY)));
             });
   }
 }

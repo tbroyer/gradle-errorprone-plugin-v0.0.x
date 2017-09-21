@@ -36,7 +36,7 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
 
     List<String> args = new JavaCompilerArgumentsBuilder(spec).includeSourceFiles(true).build();
 
-    List<URL> urls = new ArrayList<URL>();
+    List<URL> urls = new ArrayList<>();
     try {
       for (File f : errorprone) {
         urls.add(f.toURI().toURL());
@@ -53,7 +53,7 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
     }
 
     ClassLoader tccl = Thread.currentThread().getContextClassLoader();
-    int exitCode = 0;
+    int exitCode;
     try (URLClassLoader cl = new SelfFirstClassLoader(urls.toArray(new URL[urls.size()]))) {
       Thread.currentThread().setContextClassLoader(cl);
 

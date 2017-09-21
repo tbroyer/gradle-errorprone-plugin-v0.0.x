@@ -13,13 +13,7 @@ public class ErrorPronePlugin implements Plugin<Project> {
     project.apply(Collections.singletonMap("plugin", ErrorProneBasePlugin.class));
 
     final ErrorProneToolChain toolChain = ErrorProneToolChain.create(project);
-    final Action<JavaCompile> action =
-        new Action<JavaCompile>() {
-          @Override
-          public void execute(JavaCompile task) {
-            task.setToolChain(toolChain);
-          }
-        };
+    final Action<JavaCompile> action = task -> task.setToolChain(toolChain);
 
     final TaskCollection<JavaCompile> javaCompileTasks =
         project.getTasks().withType(JavaCompile.class);
