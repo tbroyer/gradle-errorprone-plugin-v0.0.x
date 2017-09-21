@@ -65,12 +65,7 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
               .getClass()
               .getMethod("compile", String[].class)
               .invoke(compiler, (Object) args.toArray(new String[args.size()]));
-      // error-prone 1.x uses the Javac from the current JDK, which returns an 'int' with a JDK 7
-      if (result instanceof Integer) {
-        exitCode = (Integer) result;
-      } else {
-        exitCode = result.getClass().getField("exitCode").getInt(result);
-      }
+      exitCode = result.getClass().getField("exitCode").getInt(result);
     } catch (Exception e) {
       throw UncheckedException.throwAsUncheckedException(e);
     } finally {

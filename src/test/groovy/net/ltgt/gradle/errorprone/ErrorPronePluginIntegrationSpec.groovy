@@ -79,30 +79,4 @@ class ErrorPronePluginIntegrationSpec extends Specification {
     where:
     gradleVersion << IntegrationTestHelper.GRADLE_VERSIONS
   }
-
-  def "compatible with errorprone 1.x"() {
-    assumeFalse("errorprone 1.x as deployed to Central only supports Java 7",
-        Jvm.current().getJavaVersion().isJava8Compatible());
-
-    given:
-    buildFile << """\
-      configurations.errorprone.resolutionStrategy {
-        force 'com.google.errorprone:error_prone_core:1.1.2'
-      }
-    """.stripIndent()
-
-    def f = new File(testProjectDir.newFolder('src', 'main', 'java', 'test'), 'Success.java')
-    f.createNewFile()
-    getClass().getResource("/test/Success.java").withInputStream { f << it }
-
-    when:
-    def result = GradleRunner.create()
-        .withProjectDir(testProjectDir.root)
-        .withArguments('--info', 'compileJava')
-        .build()
-
-    then:
-    result.output.contains("Compiling with error-prone compiler")
-    result.task(':compileJava').outcome == TaskOutcome.SUCCESS
-  }
 }
