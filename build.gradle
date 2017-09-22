@@ -1,31 +1,19 @@
-buildscript {
-    repositories {
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-        maven {
-            url "https://jitpack.io"
-        }
-    }
-    dependencies {
-        classpath "com.gradle.publish:plugin-publish-plugin:0.9.7"
-        classpath "net.ltgt.gradle:gradle-errorprone-plugin:0.0.11"
-        classpath "gradle.plugin.com.github.sherter.google-java-format:google-java-format-gradle-plugin:0.6"
-    }
+plugins {
+    id 'java-gradle-plugin'
+    id 'groovy'
+    id 'com.gradle.plugin-publish' version '0.9.7'
+    id 'com.github.sherter.google-java-format' version '0.6'
+    id 'net.ltgt.errorprone' version '0.0.11' apply false
 }
-apply plugin: "com.gradle.plugin-publish"
-apply plugin: 'java-gradle-plugin'
-apply plugin: 'groovy'
 if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
     apply plugin: 'net.ltgt.errorprone'
     dependencies {
         errorprone 'com.google.errorprone:error_prone_core:2.1.1'
     }
+}
 
-    apply plugin: 'com.github.sherter.google-java-format'
-    googleJavaFormat {
-        toolVersion = '1.4'
-    }
+googleJavaFormat {
+    toolVersion = '1.4'
 }
 
 group 'net.ltgt.gradle'
@@ -33,8 +21,8 @@ group 'net.ltgt.gradle'
 sourceCompatibility = targetCompatibility = 1.8
 
 if (JavaVersion.current().isJava9Compatible()) {
-    tasks.withType(JavaCompile).all { options.compilerArgs.addAll(['-release', '8']) }
-    tasks.withType(GroovyCompile).all { options.compilerArgs.addAll(['-release', '8']) }
+    tasks.withType(JavaCompile).all { options.compilerArgs.addAll(['--release', '8']) }
+    tasks.withType(GroovyCompile).all { options.compilerArgs.addAll(['--release', '8']) }
 }
 gradle.taskGraph.whenReady { graph ->
     if (graph.hasTask(publishPlugins)) {
