@@ -17,12 +17,21 @@ import org.gradle.api.internal.tasks.compile.JavaCompilerArgumentsBuilder;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.tasks.WorkResult;
+import org.gradle.api.tasks.WorkResults;
 import org.gradle.internal.UncheckedException;
 import org.gradle.internal.jvm.Jvm;
 import org.gradle.language.base.internal.compile.Compiler;
+import org.gradle.util.GradleVersion;
 
 public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
   private static final Logger LOGGER = Logging.getLogger(ErrorProneCompiler.class);
+
+  // Gradle 4.2 introduced WorkResults, and made SimpleWorkResult nag users.
+  @SuppressWarnings("deprecation")
+  private static final WorkResult DID_WORK =
+      GradleVersion.current().compareTo(GradleVersion.version("4.2")) >= 0
+          ? WorkResults.didWork(true)
+          : new SimpleWorkResult(true);
 
   private final Configuration errorprone;
 
@@ -75,7 +84,7 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
       throw new CompilationFailedException(exitCode);
     }
 
-    return new SimpleWorkResult(true);
+    return DID_WORK;
   }
 
   private static class SelfFirstClassLoader extends URLClassLoader {
