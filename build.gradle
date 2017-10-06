@@ -1,7 +1,7 @@
 plugins {
     id 'java-gradle-plugin'
     id 'groovy'
-    id 'com.gradle.plugin-publish' version '0.9.7'
+    id 'com.gradle.plugin-publish' version '0.9.8'
     id 'com.github.sherter.google-java-format' version '0.6'
     id 'net.ltgt.errorprone' version '0.0.11' apply false
 }
