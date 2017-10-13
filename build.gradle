@@ -3,13 +3,7 @@ plugins {
     id 'groovy'
     id 'com.gradle.plugin-publish' version '0.9.8'
     id 'com.github.sherter.google-java-format' version '0.6'
-    id 'net.ltgt.errorprone' version '0.0.12' apply false
-}
-if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
-    apply plugin: 'net.ltgt.errorprone'
-    dependencies {
-        errorprone 'com.google.errorprone:error_prone_core:2.1.1'
-    }
+    id 'net.ltgt.errorprone' version '0.0.13' apply false
 }
 
 googleJavaFormat {
@@ -20,16 +14,23 @@ group 'net.ltgt.gradle'
 
 sourceCompatibility = targetCompatibility = 1.8
 
-if (JavaVersion.current().isJava9Compatible()) {
-    tasks.withType(JavaCompile).all { options.compilerArgs.addAll(['--release', '8']) }
-    tasks.withType(GroovyCompile).all { options.compilerArgs.addAll(['--release', '8']) }
-}
 gradle.taskGraph.whenReady { graph ->
     if (graph.hasTask(publishPlugins)) {
         assert 'git diff --quiet --exit-code'.execute(null, rootDir).waitFor() == 0 : "Working tree is dirty"
         def process ='git describe --exact-match'.execute(null, rootDir)
         assert process.waitFor() == 0 : "Version is not tagged"
         version = process.text.trim() - ~'^v'
+
+        if (JavaVersion.current().isJava9Compatible()) {
+            tasks.withType(JavaCompile).all { options.compilerArgs.addAll(['--release', '8']) }
+            tasks.withType(GroovyCompile).all { options.compilerArgs.addAll(['--release', '8']) }
+        }
+    } else {
+        apply plugin: 'net.ltgt.errorprone'
+
+        dependencies {
+            errorprone 'com.google.errorprone:error_prone_core:2.1.1'
+        }
     }
 }
 
