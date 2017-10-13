@@ -17,7 +17,6 @@ import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.tasks.WorkResult;
 import org.gradle.internal.UncheckedException;
-import org.gradle.internal.jvm.Jvm;
 import org.gradle.language.base.internal.compile.Compiler;
 import org.gradle.util.GradleVersion;
 
@@ -52,13 +51,6 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
       throw new RuntimeException(mue.getMessage(), mue);
     }
 
-    if (Jvm.current().getToolsJar() == null) {
-      throw new IllegalStateException(
-          "Could not find tools.jar. Please check that "
-              + Jvm.current().getJavaHome().getAbsolutePath()
-              + " contains a valid (and compatible) JDK installation.");
-    }
-
     ClassLoader tccl = Thread.currentThread().getContextClassLoader();
     int exitCode;
     try (URLClassLoader cl = new SelfFirstClassLoader(urls.toArray(new URL[urls.size()]))) {
@@ -87,18 +79,7 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
 
   private static class SelfFirstClassLoader extends URLClassLoader {
 
-    private static ClassLoader BOOTSTRAP_ONLY_CLASSLOADER;
-
-    static {
-      try {
-        BOOTSTRAP_ONLY_CLASSLOADER =
-            new URLClassLoader(new URL[] {Jvm.current().getToolsJar().toURI().toURL()}, null);
-      } catch (MalformedURLException mue) {
-        throw new RuntimeException(mue.getMessage(), mue);
-      }
-
-      ClassLoader.registerAsParallelCapable();
-    }
+    private static final ClassLoader BOOTSTRAP_ONLY_CLASSLOADER = new ClassLoader(null) {};
 
     public SelfFirstClassLoader(URL[] urls) {
       super(urls, null);
