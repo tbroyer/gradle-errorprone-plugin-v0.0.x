@@ -10,14 +10,12 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.internal.tasks.SimpleWorkResult;
 import org.gradle.api.internal.tasks.compile.CompilationFailedException;
 import org.gradle.api.internal.tasks.compile.JavaCompileSpec;
 import org.gradle.api.internal.tasks.compile.JavaCompilerArgumentsBuilder;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.tasks.WorkResult;
-import org.gradle.api.tasks.WorkResults;
 import org.gradle.internal.UncheckedException;
 import org.gradle.internal.jvm.Jvm;
 import org.gradle.language.base.internal.compile.Compiler;
@@ -30,8 +28,8 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
   @SuppressWarnings("deprecation")
   private static final WorkResult DID_WORK =
       GradleVersion.current().compareTo(GradleVersion.version("4.2")) >= 0
-          ? WorkResults.didWork(true)
-          : new SimpleWorkResult(true);
+          ? org.gradle.api.tasks.WorkResults.didWork(true)
+          : new org.gradle.api.internal.tasks.SimpleWorkResult(true);
 
   private final Configuration errorprone;
 
