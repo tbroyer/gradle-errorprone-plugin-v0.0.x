@@ -1,6 +1,5 @@
 package net.ltgt.gradle.errorprone;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -42,18 +41,23 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
 
     List<String> args = new JavaCompilerArgumentsBuilder(spec).includeSourceFiles(true).build();
 
-    List<URL> urls = new ArrayList<>();
-    try {
-      for (File f : errorprone) {
-        urls.add(f.toURI().toURL());
-      }
-    } catch (MalformedURLException mue) {
-      throw new RuntimeException(mue.getMessage(), mue);
-    }
+    URL[] urls =
+        errorprone
+            .getFiles()
+            .stream()
+            .map(
+                file -> {
+                  try {
+                    return file.toURI().toURL();
+                  } catch (MalformedURLException e) {
+                    throw UncheckedException.throwAsUncheckedException(e);
+                  }
+                })
+            .toArray(URL[]::new);
 
     ClassLoader tccl = Thread.currentThread().getContextClassLoader();
     int exitCode;
-    try (URLClassLoader cl = new SelfFirstClassLoader(urls.toArray(new URL[urls.size()]))) {
+    try (URLClassLoader cl = new SelfFirstClassLoader(urls)) {
       Thread.currentThread().setContextClassLoader(cl);
 
       Class<?> builderClass = cl.loadClass("com.google.errorprone.ErrorProneCompiler$Builder");
