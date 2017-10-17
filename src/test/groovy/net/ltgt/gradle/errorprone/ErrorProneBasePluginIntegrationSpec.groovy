@@ -25,7 +25,7 @@ class ErrorProneBasePluginIntegrationSpec extends Specification {
         mavenCentral()
       }
       dependencies {
-        errorprone 'com.google.errorprone:error_prone_core:2.1.1'
+        errorprone fileTree(\$/${System.getProperty('dependencies')}/\$)
       }
 """.stripIndent()
 

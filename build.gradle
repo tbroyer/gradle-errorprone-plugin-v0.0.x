@@ -45,10 +45,24 @@ dependencies {
     }
 }
 
+configurations {
+    integTest
+}
+dependencies {
+    integTest "com.google.errorprone:error_prone_core:2.1.1"
+}
+
+task prepareIntegTestDependencies(type: Copy) {
+    from configurations.integTest
+    into "$buildDir/integTestDependencies/"
+}
+
 test {
+    inputs.dir prepareIntegTestDependencies
     inputs.file tasks.jar
     inputs.property "test.gradle-versions", project.findProperty("test.gradle-versions")
 
+    systemProperty("dependencies", prepareIntegTestDependencies.destinationDir)
     systemProperty("plugin", tasks.jar.archivePath)
     if (project.hasProperty("test.gradle-versions")) {
         systemProperty("test.gradle-versions", project.property("test.gradle-versions"))
