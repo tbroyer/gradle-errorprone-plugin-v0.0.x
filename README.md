@@ -133,3 +133,26 @@ compileJava {
   toolChain new ErrorProneToolChain(configurations.errorprone)
 }
 ```
+
+Troubleshooting
+---------------
+
+If your build fails with a compiler error,
+before opening an issue here,
+first make sure you're not hitting an Error Prone bug.
+
+ 1. Re-run your Gradle build with `--debug` and locate the compiler arguments in the outputs.  
+    The plugin should output a line with `Compiling with error-prone compiler`;
+    you can also search for `-sourcepath` in the output.
+ 2. Download the [standalone Error Prone compiler](https://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.google.errorprone%22%20AND%20a%3A%22error_prone_ant%22)
+    (make sure you use the same version),
+    and [run it](http://errorprone.info/docs/installation#command-line) with those arguments.  
+    You might have to add an empty-string argument after `-sourcepath`
+    (rendering of the arguments in Gradle output might omit the quotes for that empty string)
+
+If those steps reproduce the issue, then it's an ErrorProne bug
+(in which case please report the issue to [the Error Prone project](https://github.com/google/error-prone/issues));
+otherwise it might be a gradle-errorprone-plugin bug (and then I'd need a repro case to debug what's happening).
+
+You can also try using different versions of Error Prone.
+If that fixes your problem, then again it likely is **not** a gradle-errorprone-plugin bug.
