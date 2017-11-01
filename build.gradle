@@ -58,9 +58,9 @@ task prepareIntegTestDependencies(type: Copy) {
 }
 
 test {
-    inputs.dir prepareIntegTestDependencies
-    inputs.file tasks.jar
-    inputs.property "test.gradle-versions", project.findProperty("test.gradle-versions")
+    inputs.files prepareIntegTestDependencies
+    inputs.files tasks.jar
+    inputs.property "test.gradle-versions", project.findProperty("test.gradle-versions") optional true
 
     systemProperty("dependencies", prepareIntegTestDependencies.destinationDir)
     systemProperty("plugin", tasks.jar.archivePath)
