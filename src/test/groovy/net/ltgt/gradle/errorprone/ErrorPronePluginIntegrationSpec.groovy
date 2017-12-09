@@ -1,6 +1,6 @@
 package net.ltgt.gradle.errorprone
 
-import org.gradle.internal.jvm.Jvm
+import org.gradle.api.JavaVersion
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Rule
@@ -8,7 +8,7 @@ import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import static org.junit.Assume.assumeFalse
+import static org.junit.Assume.assumeTrue
 
 class ErrorPronePluginIntegrationSpec extends Specification {
   @Rule final TemporaryFolder testProjectDir = new TemporaryFolder()
@@ -77,5 +77,28 @@ class ErrorPronePluginIntegrationSpec extends Specification {
 
     where:
     gradleVersion << IntegrationTestHelper.GRADLE_VERSIONS
+  }
+
+  def "compatible with JDK 9 --release flag"() {
+    assumeTrue(JavaVersion.current().isJava9Compatible());
+
+    given:
+    buildFile << """\
+      compileJava.options.compilerArgs << '--release' << '8'
+    """.stripIndent()
+
+    def f = new File(testProjectDir.newFolder('src', 'main', 'java', 'test'), 'Success.java')
+    f.createNewFile()
+    getClass().getResource("/test/Success.java").withInputStream { f << it }
+
+    when:
+    def result = GradleRunner.create()
+            .withProjectDir(testProjectDir.root)
+            .withArguments('--info', 'compileJava')
+            .build()
+
+    then:
+    result.output.contains("Compiling with error-prone compiler")
+    result.task(':compileJava').outcome == TaskOutcome.SUCCESS
   }
 }

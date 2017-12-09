@@ -49,7 +49,7 @@ configurations {
     integTest
 }
 dependencies {
-    integTest "com.google.errorprone:error_prone_core:2.1.3"
+    integTest "com.google.errorprone:error_prone_core:2.2.0"
 }
 
 task prepareIntegTestDependencies(type: Copy) {
