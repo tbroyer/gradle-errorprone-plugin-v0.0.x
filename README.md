@@ -9,8 +9,7 @@ Requirements
 ------------
 
 This plugin depends on Gradle internal APIs,
-and is only guaranteed to work with the Gradle version it's been compiled against
-(check the `wrapper` task in the `build.gradle`.)
+and is only guaranteed to work with the Gradle version it's been tested against.
 It also depends on Javac internal APIs, directly exposed by error-prone.
 
  Gradle error-prone plugin version | Supported Gradle versions | Supported error-prone version | Supported javac version
