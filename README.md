@@ -139,7 +139,20 @@ Troubleshooting
 
 If your build fails with a compiler error,
 before opening an issue here,
-first make sure you're not hitting an Error Prone bug.
+first make sure you're not suffering from a dependency misconfiguration,
+or hitting an Error Prone bug.
+
+### Dependency configuration issue
+
+Run `gradle dependencies --configuration errorprone`
+and check that your build doesn't mistakenly override any dependency version.
+
+This could be the case if you're using the [Spring Dependency management plugin](https://plugins.gradle.org/plugin/io.spring.dependency-management),
+or the [Nebula Resolution Rules Plugin](https://plugins.gradle.org/plugin/nebula.resolution-rules),
+[Nebula Dependency Recommender](https://plugins.gradle.org/plugin/nebula.dependency-recommender),
+or [Nebula Blacklist Plugin](https://plugins.gradle.org/plugin/nebula.blacklist).
+
+### Error Prone bug
 
  1. Re-run your Gradle build with `--debug` and locate the compiler arguments in the outputs.  
     The plugin should output a line with `Compiling with error-prone compiler`;
