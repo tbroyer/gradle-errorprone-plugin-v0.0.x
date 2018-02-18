@@ -117,6 +117,28 @@ pluginBundle {
     }
 }
 
+val ktlint by configurations.creating
+
+dependencies {
+    ktlint("com.github.shyiko:ktlint:0.22.0")
+}
+
+val verifyKtlint by tasks.creating(JavaExec::class) {
+    description = "Check Kotlin code style."
+    classpath = ktlint
+    main = "com.github.shyiko.ktlint.Main"
+    args("**./*.gradle.kts", "**/*.kt")
+}
+tasks["check"].dependsOn(verifyKtlint)
+
+task("ktlint", JavaExec::class) {
+    description = "Fix Kotlin code style violations."
+    classpath = verifyKtlint.classpath
+    main = verifyKtlint.main
+    args("-F")
+    args(verifyKtlint.args)
+}
+
 fun String.execute(envp: Array<String>?, workingDir: File?) =
     Runtime.getRuntime().exec(this, envp, workingDir)
 
