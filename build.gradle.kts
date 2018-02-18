@@ -45,6 +45,10 @@ dependencies {
     }
 }
 
+tasks.withType<JavaCompile> {
+    options.compilerArgs.addAll(arrayOf("-Xlint:all", "-Werror"))
+}
+
 val integTest by configurations.creating
 
 dependencies {
