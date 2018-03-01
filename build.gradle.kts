@@ -19,8 +19,8 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 if (JavaVersion.current().isJava9Compatible) {
-    tasks.withType<JavaCompile>().all { options.compilerArgs.addAll(arrayOf("--release", "8")) }
-    tasks.withType<GroovyCompile>().all { options.compilerArgs.addAll(arrayOf("--release", "8")) }
+    tasks.withType<JavaCompile> { options.compilerArgs.addAll(arrayOf("--release", "8")) }
+    tasks.withType<GroovyCompile> { options.compilerArgs.addAll(arrayOf("--release", "8")) }
 }
 
 gradle.taskGraph.whenReady {
@@ -36,11 +36,11 @@ repositories {
     jcenter()
 }
 dependencies {
-    "errorprone"("com.google.errorprone:error_prone_core:2.2.0")
+    errorprone("com.google.errorprone:error_prone_core:2.2.0")
 
-    testCompile(localGroovy())
-    testCompile("com.netflix.nebula:nebula-test:6.1.2")
-    testCompile("org.spockframework:spock-core:1.1-groovy-2.4") {
+    testImplementation(localGroovy())
+    testImplementation("com.netflix.nebula:nebula-test:6.1.2")
+    testImplementation("org.spockframework:spock-core:1.1-groovy-2.4") {
         exclude(group = "org.codehaus.groovy")
     }
 }
@@ -64,8 +64,8 @@ val test by tasks.getting(Test::class) {
     val testGradleVersions = project.findProperty("test.gradle-versions") as? String
     val jar: Jar by tasks.getting
 
-    inputs.files(prepareIntegTestDependencies)
-    inputs.files(jar)
+    inputs.files(prepareIntegTestDependencies).withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.files(jar).withPathSensitivity(PathSensitivity.NONE)
     inputs.property("test.gradle-versions", testGradleVersions).optional(true)
 
     systemProperty("dependencies", prepareIntegTestDependencies.destinationDir)
