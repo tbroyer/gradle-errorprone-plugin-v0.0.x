@@ -119,7 +119,7 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
     public URL getResource(String name) {
       URL resource = findResource(name);
       if (resource == null) {
-        BOOTSTRAP_ONLY_CLASSLOADER.getResource(name);
+        resource = BOOTSTRAP_ONLY_CLASSLOADER.getResource(name);
       }
       return resource;
     }
