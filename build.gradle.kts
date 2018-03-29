@@ -24,10 +24,10 @@ if (JavaVersion.current().isJava9Compatible) {
 }
 
 gradle.taskGraph.whenReady {
-    if (hasTask("publishPlugins")) {
-        assert("git diff --quiet --exit-code".execute(null, rootDir).waitFor() == 0, { "Working tree is dirty" })
+    if (hasTask(tasks["publishPlugins"])) {
+        check("git diff --quiet --exit-code".execute(null, rootDir).waitFor() == 0, { "Working tree is dirty" })
         val process = "git describe --exact-match".execute(null, rootDir)
-        assert(process.waitFor() == 0, { "Version is not tagged" })
+        check(process.waitFor() == 0, { "Version is not tagged" })
         version = process.text.trim().removePrefix("v")
     }
 }
