@@ -51,7 +51,7 @@ repositories {
 
 ¹: For older versions of the plugins, please read [the according version of this README](https://github.com/tbroyer/gradle-errorprone-plugin/commits/master/README.md)
 
-When applied, the `net.ltgt.errorprone` plugin automatically  changes all `JavaCompile` tasks in
+When applied, the `net.ltgt.errorprone` plugin automatically changes all `JavaCompile` tasks in
 the project to use the error-prone compiler.
 (Note: earlier versions used `errorprone` as the plugin identifier instead of `net.ltgt.errorprone`.)
 
@@ -73,7 +73,8 @@ dependencies {
 }
 ```
 
-or, for versions of the plugin before (and including) 0.0.8:
+<details>
+<summary>or, for versions of the plugin before (and including) 0.0.8:</summary>
 
 ```groovy
 configurations.errorprone {
@@ -82,7 +83,9 @@ configurations.errorprone {
 }
 ```
 
-If you forked error-prone and changed the `groupId`, the syntax may vary (depending on the version of the plugin):
+</details>
+
+If you forked error-prone and changed the `groupId`, use:
 
 ```groovy
 dependencies {
@@ -91,7 +94,8 @@ dependencies {
 }
 ```
 
-or
+<details>
+<summary>or, for versions of the plugin before (and including) 0.0.8:</summary>
 
 ```groovy
 // Use my.company fork of error-prone
@@ -103,6 +107,8 @@ configurations.errorprone {
   }
 }
 ```
+
+</details>
 
 Advanced usage
 --------------
