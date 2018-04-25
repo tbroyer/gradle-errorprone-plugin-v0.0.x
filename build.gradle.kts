@@ -9,8 +9,6 @@ plugins {
     `maven-publish`
 }
 
-version = "0.0.13-artem"
-
 googleJavaFormat {
     toolVersion = "1.5"
 }

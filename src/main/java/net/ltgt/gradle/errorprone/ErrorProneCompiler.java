@@ -84,7 +84,11 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
 
     private static final ClassLoader BOOTSTRAP_ONLY_CLASSLOADER = new ClassLoader(null) {};
 
-    // Guarded by SelfFirstClassLoader.class
+    /**
+     * Cache ClassLoader to allow JVM properly JIT it and reuse optimizations after warm-up.
+     *
+     * Guarded by SelfFirstClassLoader.class
+     */
     private static final Map<Set<URL>, SelfFirstClassLoader> CACHE = new HashMap<>(1);
 
     synchronized static SelfFirstClassLoader getInstance(Set<URL> urls) {
@@ -93,9 +97,6 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
       if (instance == null) {
         instance = new SelfFirstClassLoader(urls);
         CACHE.put(urls, instance);
-        System.out.println("~~~ Cache miss");
-      } else {
-        System.out.println("~~~ Hit cache!");
       }
 
       return instance;
