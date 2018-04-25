@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.internal.tasks.compile.CompilationFailedException;
@@ -39,7 +40,7 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
 
     List<String> args = new JavaCompilerArgumentsBuilder(spec).includeSourceFiles(true).build();
 
-    URL[] urls =
+    Set<URL> urls =
         errorprone
             .getFiles()
             .stream()
@@ -51,7 +52,7 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
                     throw UncheckedException.throwAsUncheckedException(e);
                   }
                 })
-            .toArray(URL[]::new);
+            .collect(Collectors.toSet());
 
     ClassLoader tccl = Thread.currentThread().getContextClassLoader();
     int exitCode;
@@ -82,21 +83,26 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
   private static class SelfFirstClassLoader extends URLClassLoader {
 
     private static final ClassLoader BOOTSTRAP_ONLY_CLASSLOADER = new ClassLoader(null) {};
-    private static SelfFirstClassLoader INSTANCE;
 
-    synchronized static SelfFirstClassLoader getInstance(URL[] urls) {
-        if (INSTANCE == null || !Arrays.equals(INSTANCE.urls, urls)) {
-          INSTANCE = new SelfFirstClassLoader(urls);
-        }
+    // Guarded by SelfFirstClassLoader.class
+    private static final Map<Set<URL>, SelfFirstClassLoader> CACHE = new HashMap<>(1);
 
-        return INSTANCE;
+    synchronized static SelfFirstClassLoader getInstance(Set<URL> urls) {
+      SelfFirstClassLoader instance = CACHE.get(urls);
+
+      if (instance == null) {
+        instance = new SelfFirstClassLoader(urls);
+        CACHE.put(urls, instance);
+        System.out.println("~~~ Cache miss");
+      } else {
+        System.out.println("~~~ Hit cache!");
+      }
+
+      return instance;
     }
 
-    private final URL[] urls;
-
-    private SelfFirstClassLoader(URL[] urls) {
-      super(urls, null);
-      this.urls = urls;
+    private SelfFirstClassLoader(Set<URL> urls) {
+      super(urls.toArray(new URL[0]), null);
     }
 
     @Override
