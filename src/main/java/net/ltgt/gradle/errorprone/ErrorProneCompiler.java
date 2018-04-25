@@ -4,10 +4,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
+
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.internal.tasks.compile.CompilationFailedException;
 import org.gradle.api.internal.tasks.compile.JavaCompileSpec;
@@ -57,7 +55,7 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
 
     ClassLoader tccl = Thread.currentThread().getContextClassLoader();
     int exitCode;
-    try (URLClassLoader cl = new SelfFirstClassLoader(urls)) {
+    try (URLClassLoader cl = SelfFirstClassLoader.getInstance(urls)) {
       Thread.currentThread().setContextClassLoader(cl);
 
       Class<?> builderClass = cl.loadClass("com.google.errorprone.ErrorProneCompiler$Builder");
@@ -84,9 +82,21 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
   private static class SelfFirstClassLoader extends URLClassLoader {
 
     private static final ClassLoader BOOTSTRAP_ONLY_CLASSLOADER = new ClassLoader(null) {};
+    private static SelfFirstClassLoader INSTANCE;
 
-    public SelfFirstClassLoader(URL[] urls) {
+    synchronized static SelfFirstClassLoader getInstance(URL[] urls) {
+        if (INSTANCE == null || !Arrays.equals(INSTANCE.urls, urls)) {
+          INSTANCE = new SelfFirstClassLoader(urls);
+        }
+
+        return INSTANCE;
+    }
+
+    private final URL[] urls;
+
+    private SelfFirstClassLoader(URL[] urls) {
       super(urls, null);
+      this.urls = urls;
     }
 
     @Override

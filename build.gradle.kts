@@ -6,7 +6,10 @@ plugins {
     id("com.gradle.plugin-publish") version "0.9.10"
     id("com.github.sherter.google-java-format") version "0.6"
     id("net.ltgt.errorprone") version "0.0.13"
+    `maven-publish`
 }
+
+version = "0.0.13-artem"
 
 googleJavaFormat {
     toolVersion = "1.5"
