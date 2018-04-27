@@ -180,10 +180,8 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
     try {
       new JarFile(jar)
           .stream()
-          .filter(it -> !it.isDirectory())
-          .filter(it -> it.getName().endsWith(".class"))
-          .map(it -> it.getName().replace('/', '.'))
-          .map(it -> it.substring(0, it.length() - 6))
+          .filter(it -> !it.isDirectory() && it.getName().endsWith(".class"))
+          .map(it -> it.getName().replace('/', '.').substring(0, it.getName().length() - 6))
           .forEach(
               it -> {
                 try {
