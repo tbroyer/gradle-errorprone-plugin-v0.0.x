@@ -1,7 +1,9 @@
 package net.ltgt.gradle.errorprone;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -11,8 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.jar.JarFile;
 import java.util.stream.Collectors;
-
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.internal.tasks.compile.CompilationFailedException;
 import org.gradle.api.internal.tasks.compile.JavaCompileSpec;
@@ -46,23 +48,11 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
 
     List<String> args = new JavaCompilerArgumentsBuilder(spec).includeSourceFiles(true).build();
 
-    Set<URL> urls =
-        errorprone
-            .getFiles()
-            .stream()
-            .map(
-                file -> {
-                  try {
-                    return file.toURI().toURL();
-                  } catch (MalformedURLException e) {
-                    throw UncheckedException.throwAsUncheckedException(e);
-                  }
-                })
-            .collect(Collectors.toSet());
+    Set<URI> uris = errorprone.getFiles().stream().map(File::toURI).collect(Collectors.toSet());
 
     ClassLoader tccl = Thread.currentThread().getContextClassLoader();
     int exitCode;
-    try (URLClassLoader cl = SelfFirstClassLoader.getInstance(urls)) {
+    try (URLClassLoader cl = SelfFirstClassLoader.getInstance(uris)) {
       Thread.currentThread().setContextClassLoader(cl);
 
       Class<?> builderClass = cl.loadClass("com.google.errorprone.ErrorProneCompiler$Builder");
@@ -93,23 +83,43 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
     /**
      * Cache ClassLoader to allow JVM properly JIT it and reuse optimizations after warm-up.
      *
-     * Guarded by SelfFirstClassLoader.class
+     * <p>Guarded by SelfFirstClassLoader.class
      */
-    private static final Map<Set<URL>, SelfFirstClassLoader> CACHE = new HashMap<>(1);
+    private static final Map<Set<URI>, SelfFirstClassLoader> CACHE = new HashMap<>(1);
 
-    synchronized static SelfFirstClassLoader getInstance(Set<URL> urls) {
-      SelfFirstClassLoader instance = CACHE.get(urls);
+    static {
+      registerAsParallelCapable();
+    }
+
+    static synchronized SelfFirstClassLoader getInstance(Set<URI> uris) {
+      SelfFirstClassLoader instance = CACHE.get(uris);
 
       if (instance == null) {
-        instance = new SelfFirstClassLoader(urls);
-        CACHE.put(urls, instance);
+        instance = new SelfFirstClassLoader(uris);
+        CACHE.put(uris, instance);
+
+        final SelfFirstClassLoader classLoader = instance;
+
+        // Workaround to fix ClassNotFoundException on subsequent iterations.
+        uris.stream().map(File::new).forEach(jar -> loadAllClassesFromJar(classLoader, jar));
       }
 
       return instance;
     }
 
-    private SelfFirstClassLoader(Set<URL> urls) {
-      super(urls.toArray(new URL[0]), null);
+    private SelfFirstClassLoader(Set<URI> uris) {
+      super(
+          uris.stream()
+              .map(
+                  uri -> {
+                    try {
+                      return uri.toURL();
+                    } catch (MalformedURLException e) {
+                      throw UncheckedException.throwAsUncheckedException(e);
+                    }
+                  })
+              .toArray(URL[]::new),
+          null);
     }
 
     @Override
@@ -164,5 +174,26 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
 
     // XXX: we know URLClassLoader#getResourceAsStream calls getResource, so we don't have to
     // override it here.
+  }
+
+  private static void loadAllClassesFromJar(ClassLoader classLoader, File jar) {
+    try {
+      new JarFile(jar)
+          .stream()
+          .filter(it -> !it.isDirectory())
+          .filter(it -> it.getName().endsWith(".class"))
+          .map(it -> it.getName().replace('/', '.'))
+          .map(it -> it.substring(0, it.length() - 6))
+          .forEach(
+              it -> {
+                try {
+                  classLoader.loadClass(it);
+                } catch (ClassNotFoundException | NoClassDefFoundError ignore) {
+                  // ignore
+                }
+              });
+    } catch (IOException e) {
+      throw UncheckedException.throwAsUncheckedException(e);
+    }
   }
 }
