@@ -36,10 +36,10 @@ repositories {
     jcenter()
 }
 dependencies {
-    errorprone("com.google.errorprone:error_prone_core:2.2.0")
+    errorprone("com.google.errorprone:error_prone_core:2.3.1")
 
     testImplementation(localGroovy())
-    testImplementation("com.netflix.nebula:nebula-test:6.1.2")
+    testImplementation("com.netflix.nebula:nebula-test:6.4.2")
     testImplementation("org.spockframework:spock-core:1.1-groovy-2.4") {
         exclude(group = "org.codehaus.groovy")
     }
