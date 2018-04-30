@@ -5,7 +5,7 @@ build_script:
   - cmd: .\gradlew.bat assemble --no-daemon
 
 test_script:
-  - cmd: .\gradlew.bat check --no-daemon -Ptest.gradle-versions=4.7
+  - cmd: .\gradlew.bat check --no-daemon
 
 environment:
   matrix:

@@ -61,18 +61,16 @@ val prepareIntegTestDependencies by tasks.creating(Copy::class) {
 }
 
 val test by tasks.getting(Test::class) {
-    val testGradleVersions = project.findProperty("test.gradle-versions") as? String
     val jar: Jar by tasks.getting
+
+    val testGradleVersion = project.findProperty("test.gradle-version")
+    testGradleVersion?.also { systemProperty("test.gradle-version", testGradleVersion) }
 
     inputs.files(prepareIntegTestDependencies).withPathSensitivity(PathSensitivity.RELATIVE)
     inputs.files(jar).withPathSensitivity(PathSensitivity.NONE)
-    inputs.property("test.gradle-versions", testGradleVersions).optional(true)
 
     systemProperty("dependencies", prepareIntegTestDependencies.destinationDir)
     systemProperty("plugin", jar.archivePath)
-    if (!testGradleVersions.isNullOrBlank()) {
-        systemProperty("test.gradle-versions", testGradleVersions!!)
-    }
 
     testLogging {
         showExceptions = true
