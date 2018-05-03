@@ -9,11 +9,8 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.internal.tasks.compile.CompilationFailedException;
@@ -83,27 +80,35 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
     private static final ClassLoader BOOTSTRAP_ONLY_CLASSLOADER = new ClassLoader(null) {};
 
     /**
-     * Cache ClassLoader to allow JVM properly JIT it and reuse optimizations after warm-up.
-     *
-     * <p>Guarded by SelfFirstClassLoader.class
+     * Cache ClassLoader to allow JVM properly JIT loaded classes and reuse optimizations after
+     * warm-up.
      */
-    private static final Map<Set<URI>, SelfFirstClassLoader> CACHE = new HashMap<>(1);
+    private static volatile SelfFirstClassLoader INSTANCE;
+
+    private static final Object LOCK = new Object();
 
     static {
       // Both SelfFirstClassLoader and URLClassLoader comply with parallel capable requirements.
       registerAsParallelCapable();
     }
 
-    static synchronized SelfFirstClassLoader getInstance(Set<URI> uris) {
-      SelfFirstClassLoader instance = CACHE.get(uris);
+    static SelfFirstClassLoader getInstance(Set<URI> uris) {
+      SelfFirstClassLoader instance = INSTANCE;
 
-      if (instance == null) {
-        instance = new SelfFirstClassLoader(uris);
-        CACHE.put(uris, instance);
+      if (instance == null || !instance.uris.equals(uris)) {
+        synchronized (LOCK) {
+          instance = INSTANCE;
+
+          if (instance == null || !instance.uris.equals(uris)) {
+            instance = INSTANCE = new SelfFirstClassLoader(uris);
+          }
+        }
       }
 
       return instance;
     }
+
+    private final Set<URI> uris;
 
     private SelfFirstClassLoader(Set<URI> uris) {
       super(
@@ -118,6 +123,7 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
                   })
               .toArray(URL[]::new),
           null);
+      this.uris = uris;
     }
 
     @Override
