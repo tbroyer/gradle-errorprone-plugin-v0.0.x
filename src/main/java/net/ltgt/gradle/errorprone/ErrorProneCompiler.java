@@ -51,8 +51,10 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
     Set<URI> uris = errorprone.getFiles().stream().map(File::toURI).collect(Collectors.toSet());
 
     ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+    URLClassLoader cl = SelfFirstClassLoader.getInstance(uris);
+
     int exitCode;
-    try (URLClassLoader cl = SelfFirstClassLoader.getInstance(uris)) {
+    try {
       Thread.currentThread().setContextClassLoader(cl);
 
       Class<?> builderClass = cl.loadClass("com.google.errorprone.ErrorProneCompiler$Builder");
@@ -88,6 +90,7 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
     private static final Map<Set<URI>, SelfFirstClassLoader> CACHE = new HashMap<>(1);
 
     static {
+      // Both SelfFirstClassLoader and URLClassLoader comply with parallel capable requirements.
       registerAsParallelCapable();
     }
 
@@ -97,11 +100,6 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
       if (instance == null) {
         instance = new SelfFirstClassLoader(uris);
         CACHE.put(uris, instance);
-
-        final SelfFirstClassLoader classLoader = instance;
-
-        // Workaround to fix ClassNotFoundException on subsequent iterations.
-        uris.stream().map(File::new).forEach(jar -> loadAllClassesFromJar(classLoader, jar));
       }
 
       return instance;
@@ -174,24 +172,5 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
 
     // XXX: we know URLClassLoader#getResourceAsStream calls getResource, so we don't have to
     // override it here.
-  }
-
-  private static void loadAllClassesFromJar(ClassLoader classLoader, File jar) {
-    try {
-      new JarFile(jar)
-          .stream()
-          .filter(it -> !it.isDirectory() && it.getName().endsWith(".class"))
-          .map(it -> it.getName().replace('/', '.').substring(0, it.getName().length() - 6))
-          .forEach(
-              it -> {
-                try {
-                  classLoader.loadClass(it);
-                } catch (ClassNotFoundException | NoClassDefFoundError ignore) {
-                  // ignore
-                }
-              });
-    } catch (IOException e) {
-      throw UncheckedException.throwAsUncheckedException(e);
-    }
   }
 }
