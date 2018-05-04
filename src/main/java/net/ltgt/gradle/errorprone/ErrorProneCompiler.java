@@ -6,11 +6,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.internal.tasks.compile.CompilationFailedException;
@@ -45,10 +41,11 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
 
     List<String> args = new JavaCompilerArgumentsBuilder(spec).includeSourceFiles(true).build();
 
-    Set<URI> uris = errorprone.getFiles().stream().map(File::toURI).collect(Collectors.toSet());
+    Set<URI> jarUris = errorprone.getFiles().stream().map(File::toURI).collect(Collectors.toSet());
+    ErrorProneJars errorProneJars = new ErrorProneJars(jarUris);
 
     ClassLoader tccl = Thread.currentThread().getContextClassLoader();
-    URLClassLoader cl = SelfFirstClassLoader.getInstance(uris);
+    URLClassLoader cl = SelfFirstClassLoader.getInstance(errorProneJars);
 
     int exitCode;
     try {
@@ -88,19 +85,19 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
     private static final Object LOCK = new Object();
 
     static {
-      // Both SelfFirstClassLoader and URLClassLoader comply with parallel capable requirements.
+      // Both SelfFirstClassLoader and URLClassLoader comply with parallelCapable requirements.
       registerAsParallelCapable();
     }
 
-    static SelfFirstClassLoader getInstance(Set<URI> uris) {
+    static SelfFirstClassLoader getInstance(final ErrorProneJars errorProneJars) {
       SelfFirstClassLoader instance = INSTANCE;
 
-      if (instance == null || !instance.uris.equals(uris)) {
+      if (!canReuseClassLoader(instance, errorProneJars)) {
         synchronized (LOCK) {
           instance = INSTANCE;
 
-          if (instance == null || !instance.uris.equals(uris)) {
-            instance = INSTANCE = new SelfFirstClassLoader(uris);
+          if (!canReuseClassLoader(instance, errorProneJars)) {
+            instance = INSTANCE = new SelfFirstClassLoader(errorProneJars);
           }
         }
       }
@@ -108,11 +105,14 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
       return instance;
     }
 
-    private final Set<URI> uris;
+    private final ErrorProneJars errorProneJars;
 
-    private SelfFirstClassLoader(Set<URI> uris) {
+    private SelfFirstClassLoader(ErrorProneJars errorProneJars) {
       super(
-          uris.stream()
+          errorProneJars
+              .jars
+              .keySet()
+              .stream()
               .map(
                   uri -> {
                     try {
@@ -123,7 +123,7 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
                   })
               .toArray(URL[]::new),
           null);
-      this.uris = uris;
+      this.errorProneJars = errorProneJars;
     }
 
     @Override
@@ -178,5 +178,60 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
 
     // XXX: we know URLClassLoader#getResourceAsStream calls getResource, so we don't have to
     // override it here.
+
+    private static boolean canReuseClassLoader(
+        SelfFirstClassLoader cachedInstance, ErrorProneJars newErrorProneJars) {
+      return cachedInstance != null && cachedInstance.errorProneJars.equals(newErrorProneJars);
+    }
+  }
+
+  private static final class ErrorProneJars {
+    final Map<URI, JarIdentity> jars;
+
+    ErrorProneJars(Set<URI> jars) {
+      this.jars =
+          jars.parallelStream()
+              .map(jarUri -> new HashMap.SimpleEntry<>(jarUri, new JarIdentity(jarUri)))
+              .collect(
+                  Collectors.toMap(
+                      AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      ErrorProneJars that = (ErrorProneJars) o;
+      return Objects.equals(jars, that.jars);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(jars);
+    }
+
+    private static final class JarIdentity {
+      private final long lastModified;
+      private final long lengthBytes;
+
+      JarIdentity(URI jarUri) {
+        final File jar = new File(jarUri);
+        this.lastModified = jar.lastModified();
+        this.lengthBytes = jar.length();
+      }
+
+      @Override
+      public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        JarIdentity that = (JarIdentity) o;
+        return lastModified == that.lastModified && lengthBytes == that.lengthBytes;
+      }
+
+      @Override
+      public int hashCode() {
+        return Objects.hash(lastModified, lengthBytes);
+      }
+    }
   }
 }
