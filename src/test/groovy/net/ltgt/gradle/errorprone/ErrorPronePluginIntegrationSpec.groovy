@@ -74,7 +74,8 @@ class ErrorPronePluginIntegrationSpec extends Specification {
   }
 
   def "compatible with JDK 9 --release flag"() {
-    assumeTrue(JavaVersion.current().isJava9Compatible());
+    assumeTrue(JavaVersion.current().isJava9Compatible())
+    assumeTrue(GradleVersion.version(testGradleVersion) >= GradleVersion.version("4.3"))
 
     given:
     buildFile << """\
@@ -87,6 +88,7 @@ class ErrorPronePluginIntegrationSpec extends Specification {
 
     when:
     def result = GradleRunner.create()
+            .withGradleVersion(testGradleVersion)
             .withProjectDir(testProjectDir.root)
             .withArguments('--info', 'compileJava')
             .build()
