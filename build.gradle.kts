@@ -36,10 +36,10 @@ repositories {
     jcenter()
 }
 dependencies {
-    errorprone("com.google.errorprone:error_prone_core:2.2.0")
+    errorprone("com.google.errorprone:error_prone_core:2.3.1")
 
     testImplementation(localGroovy())
-    testImplementation("com.netflix.nebula:nebula-test:6.1.2")
+    testImplementation("com.netflix.nebula:nebula-test:6.4.2")
     testImplementation("org.spockframework:spock-core:1.1-groovy-2.4") {
         exclude(group = "org.codehaus.groovy")
     }
@@ -61,18 +61,16 @@ val prepareIntegTestDependencies by tasks.creating(Copy::class) {
 }
 
 val test by tasks.getting(Test::class) {
-    val testGradleVersions = project.findProperty("test.gradle-versions") as? String
     val jar: Jar by tasks.getting
+
+    val testGradleVersion = project.findProperty("test.gradle-version")
+    testGradleVersion?.also { systemProperty("test.gradle-version", testGradleVersion) }
 
     inputs.files(prepareIntegTestDependencies).withPathSensitivity(PathSensitivity.RELATIVE)
     inputs.files(jar).withPathSensitivity(PathSensitivity.NONE)
-    inputs.property("test.gradle-versions", testGradleVersions).optional(true)
 
     systemProperty("dependencies", prepareIntegTestDependencies.destinationDir)
     systemProperty("plugin", jar.archivePath)
-    if (!testGradleVersions.isNullOrBlank()) {
-        systemProperty("test.gradle-versions", testGradleVersions!!)
-    }
 
     testLogging {
         showExceptions = true
@@ -115,6 +113,28 @@ pluginBundle {
         groupId = project.group.toString()
         artifactId = project.name
     }
+}
+
+val ktlint by configurations.creating
+
+dependencies {
+    ktlint("com.github.shyiko:ktlint:0.22.0")
+}
+
+val verifyKtlint by tasks.creating(JavaExec::class) {
+    description = "Check Kotlin code style."
+    classpath = ktlint
+    main = "com.github.shyiko.ktlint.Main"
+    args("**./*.gradle.kts", "**/*.kt")
+}
+tasks["check"].dependsOn(verifyKtlint)
+
+task("ktlint", JavaExec::class) {
+    description = "Fix Kotlin code style violations."
+    classpath = verifyKtlint.classpath
+    main = verifyKtlint.main
+    args("-F")
+    args(verifyKtlint.args)
 }
 
 fun String.execute(envp: Array<String>?, workingDir: File?) =

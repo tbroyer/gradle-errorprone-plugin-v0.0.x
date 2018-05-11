@@ -2,65 +2,65 @@ language: java
 sudo: false
 matrix:
   include:
-  - env: TEST_GRADLE_VERSIONS=2.6
+  - env: TEST_GRADLE_VERSION=2.6
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSIONS=2.7
+  - env: TEST_GRADLE_VERSION=2.7
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSIONS=2.8
+  - env: TEST_GRADLE_VERSION=2.8
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSIONS=2.9
+  - env: TEST_GRADLE_VERSION=2.9
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSIONS=2.10
+  - env: TEST_GRADLE_VERSION=2.10
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSIONS=2.11
+  - env: TEST_GRADLE_VERSION=2.11
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSIONS=2.12
+  - env: TEST_GRADLE_VERSION=2.12
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSIONS=2.13
+  - env: TEST_GRADLE_VERSION=2.13
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSIONS=2.14
+  - env: TEST_GRADLE_VERSION=2.14
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSIONS=3.0
+  - env: TEST_GRADLE_VERSION=3.0
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSIONS=3.1
+  - env: TEST_GRADLE_VERSION=3.1
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSIONS=3.2
+  - env: TEST_GRADLE_VERSION=3.2
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSIONS=3.3
+  - env: TEST_GRADLE_VERSION=3.3
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSIONS=3.4
+  - env: TEST_GRADLE_VERSION=3.4
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSIONS=3.5
+  - env: TEST_GRADLE_VERSION=3.5
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSIONS=4.0
+  - env: TEST_GRADLE_VERSION=4.0
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSIONS=4.1
+  - env: TEST_GRADLE_VERSION=4.1
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSIONS=4.2
+  - env: TEST_GRADLE_VERSION=4.2
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSIONS=4.3
+  - env: TEST_GRADLE_VERSION=4.3
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSIONS=4.4
+  - env: TEST_GRADLE_VERSION=4.4
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSIONS=4.5
+  - env: TEST_GRADLE_VERSION=4.5
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSIONS=4.6
+  - env: TEST_GRADLE_VERSION=4.6
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSIONS=4.7
+  - env: TEST_GRADLE_VERSION=4.7
     jdk: oraclejdk8
 
-  - env: TEST_GRADLE_VERSIONS=4.3
+  - env: TEST_GRADLE_VERSION=4.3
     jdk: oraclejdk9
-  - env: TEST_GRADLE_VERSIONS=4.4
+  - env: TEST_GRADLE_VERSION=4.4
     jdk: oraclejdk9
-  - env: TEST_GRADLE_VERSIONS=4.5
+  - env: TEST_GRADLE_VERSION=4.5
     jdk: oraclejdk9
-  - env: TEST_GRADLE_VERSIONS=4.6
+  - env: TEST_GRADLE_VERSION=4.6
     jdk: oraclejdk9
-  - env: TEST_GRADLE_VERSIONS=4.7
+  - env: TEST_GRADLE_VERSION=4.7
     jdk: oraclejdk9
 install: true
-script: ./gradlew build -Ptest.gradle-versions="$TEST_GRADLE_VERSIONS"
+script: ./gradlew build -Ptest.gradle-version="$TEST_GRADLE_VERSION"
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/

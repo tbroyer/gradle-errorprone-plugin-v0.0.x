@@ -2,12 +2,18 @@ package net.ltgt.gradle.errorprone;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.stream.Collectors;
+import org.gradle.api.JavaVersion;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.internal.tasks.compile.CompilationFailedException;
 import org.gradle.api.internal.tasks.compile.JavaCompileSpec;
@@ -74,7 +80,24 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
 
   private static class SelfFirstClassLoader extends URLClassLoader {
 
-    private static final ClassLoader BOOTSTRAP_ONLY_CLASSLOADER = new ClassLoader(null) {};
+    private static final ClassLoader PLATFORM_CLASSLOADER;
+    private static final ClassLoader PARENT_CLASSLOADER;
+
+    static {
+      ClassLoader platformClassloader, parentClassloader;
+      try {
+        platformClassloader =
+            ClassLoader.class.cast(
+                ClassLoader.class.getMethod("getPlatformClassLoader").invoke(null));
+        parentClassloader = platformClassloader;
+      } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+        assert !JavaVersion.current().isJava9Compatible();
+        platformClassloader = new ClassLoader(null) {};
+        parentClassloader = null;
+      }
+      PLATFORM_CLASSLOADER = platformClassloader;
+      PARENT_CLASSLOADER = parentClassloader;
+    }
 
     /**
      * Cache ClassLoader to allow JVM properly JIT loaded classes and reuse optimizations after
@@ -122,7 +145,7 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
                     }
                   })
               .toArray(URL[]::new),
-          null);
+          PARENT_CLASSLOADER);
       this.errorProneJars = errorProneJars;
     }
 
@@ -142,7 +165,7 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
             // ignore, fallback to bootstrap classloader
           }
           if (cls == null) {
-            cls = BOOTSTRAP_ONLY_CLASSLOADER.loadClass(name);
+            cls = PLATFORM_CLASSLOADER.loadClass(name);
           }
         }
         if (resolve) {
@@ -156,7 +179,7 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
     public URL getResource(String name) {
       URL resource = findResource(name);
       if (resource == null) {
-        resource = BOOTSTRAP_ONLY_CLASSLOADER.getResource(name);
+        resource = PLATFORM_CLASSLOADER.getResource(name);
       }
       return resource;
     }
@@ -164,7 +187,7 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
     @Override
     public Enumeration<URL> getResources(String name) throws IOException {
       Enumeration<URL> selfResources = findResources(name);
-      Enumeration<URL> bootstrapResources = BOOTSTRAP_ONLY_CLASSLOADER.getResources(name);
+      Enumeration<URL> bootstrapResources = PLATFORM_CLASSLOADER.getResources(name);
       if (!selfResources.hasMoreElements()) {
         return bootstrapResources;
       }

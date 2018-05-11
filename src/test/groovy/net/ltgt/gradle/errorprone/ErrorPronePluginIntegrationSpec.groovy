@@ -3,16 +3,18 @@ package net.ltgt.gradle.errorprone
 import org.gradle.api.JavaVersion
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
+import org.gradle.util.GradleVersion
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
-import spock.lang.Unroll
 
 import static org.junit.Assume.assumeTrue
 
 class ErrorPronePluginIntegrationSpec extends Specification {
   @Rule final TemporaryFolder testProjectDir = new TemporaryFolder()
   File buildFile
+
+  final String testGradleVersion = System.getProperty("test.gradle-version", GradleVersion.current().version)
 
   def setup() {
     buildFile = testProjectDir.newFile('build.gradle')
@@ -34,8 +36,7 @@ class ErrorPronePluginIntegrationSpec extends Specification {
 """.stripIndent()
   }
 
-  @Unroll
-  def "compilation succeeds with Gradle #gradleVersion"() {
+  def "compilation succeeds"() {
     given:
     def f = new File(testProjectDir.newFolder('src', 'main', 'java', 'test'), 'Success.java')
     f.createNewFile()
@@ -43,7 +44,7 @@ class ErrorPronePluginIntegrationSpec extends Specification {
 
     when:
     def result = GradleRunner.create()
-        .withGradleVersion(gradleVersion)
+        .withGradleVersion(testGradleVersion)
         .withProjectDir(testProjectDir.root)
         .withArguments('--info', '--stacktrace', 'compileJava')
         .build()
@@ -51,13 +52,9 @@ class ErrorPronePluginIntegrationSpec extends Specification {
     then:
     result.output.contains("Compiling with error-prone compiler")
     result.task(':compileJava').outcome == TaskOutcome.SUCCESS
-
-    where:
-    gradleVersion << IntegrationTestHelper.GRADLE_VERSIONS
   }
 
-  @Unroll
-  def "compilation fails with Gradle #gradleVersion"() {
+  def "compilation fails"() {
     given:
     def f = new File(testProjectDir.newFolder('src', 'main', 'java', 'test'), 'Failure.java')
     f.createNewFile()
@@ -65,7 +62,7 @@ class ErrorPronePluginIntegrationSpec extends Specification {
 
     when:
     def result = GradleRunner.create()
-        .withGradleVersion(gradleVersion)
+        .withGradleVersion(testGradleVersion)
         .withProjectDir(testProjectDir.root)
         .withArguments('--info', '--stacktrace', 'compileJava')
         .buildAndFail()
@@ -74,13 +71,11 @@ class ErrorPronePluginIntegrationSpec extends Specification {
     result.output.contains("Compiling with error-prone compiler")
     result.task(':compileJava').outcome == TaskOutcome.FAILED
     result.output.contains("Failure.java:6: error: [ArrayEquals]")
-
-    where:
-    gradleVersion << IntegrationTestHelper.GRADLE_VERSIONS
   }
 
   def "compatible with JDK 9 --release flag"() {
-    assumeTrue(JavaVersion.current().isJava9Compatible());
+    assumeTrue(JavaVersion.current().isJava9Compatible())
+    assumeTrue(GradleVersion.version(testGradleVersion) >= GradleVersion.version("4.3"))
 
     given:
     buildFile << """\
@@ -93,6 +88,7 @@ class ErrorPronePluginIntegrationSpec extends Specification {
 
     when:
     def result = GradleRunner.create()
+            .withGradleVersion(testGradleVersion)
             .withProjectDir(testProjectDir.root)
             .withArguments('--info', '--stacktrace', 'compileJava')
             .build()
