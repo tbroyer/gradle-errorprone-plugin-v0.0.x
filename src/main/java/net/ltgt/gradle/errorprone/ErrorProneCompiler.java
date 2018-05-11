@@ -190,7 +190,7 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
 
     ErrorProneJars(Set<URI> jars) {
       this.jars =
-          jars.parallelStream()
+          jars.stream()
               .map(jarUri -> new HashMap.SimpleEntry<>(jarUri, new JarIdentity(jarUri)))
               .collect(
                   Collectors.toMap(
