@@ -46,7 +46,7 @@ class ErrorPronePluginIntegrationSpec extends Specification {
     def result = GradleRunner.create()
         .withGradleVersion(testGradleVersion)
         .withProjectDir(testProjectDir.root)
-        .withArguments('--info', 'compileJava')
+        .withArguments('--info', '--stacktrace', 'compileJava')
         .build()
 
     then:
@@ -64,7 +64,7 @@ class ErrorPronePluginIntegrationSpec extends Specification {
     def result = GradleRunner.create()
         .withGradleVersion(testGradleVersion)
         .withProjectDir(testProjectDir.root)
-        .withArguments('--info', 'compileJava')
+        .withArguments('--info', '--stacktrace', 'compileJava')
         .buildAndFail()
 
     then:
@@ -90,7 +90,7 @@ class ErrorPronePluginIntegrationSpec extends Specification {
     def result = GradleRunner.create()
             .withGradleVersion(testGradleVersion)
             .withProjectDir(testProjectDir.root)
-            .withArguments('--info', 'compileJava')
+            .withArguments('--info', '--stacktrace', 'compileJava')
             .build()
 
     then:

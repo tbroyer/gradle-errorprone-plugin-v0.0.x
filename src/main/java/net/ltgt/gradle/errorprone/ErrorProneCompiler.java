@@ -1,14 +1,15 @@
 package net.ltgt.gradle.errorprone;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.internal.tasks.compile.CompilationFailedException;
@@ -43,23 +44,14 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
 
     List<String> args = new JavaCompilerArgumentsBuilder(spec).includeSourceFiles(true).build();
 
-    URL[] urls =
-        errorprone
-            .getFiles()
-            .stream()
-            .map(
-                file -> {
-                  try {
-                    return file.toURI().toURL();
-                  } catch (MalformedURLException e) {
-                    throw UncheckedException.throwAsUncheckedException(e);
-                  }
-                })
-            .toArray(URL[]::new);
+    Set<URI> jarUris = errorprone.getFiles().stream().map(File::toURI).collect(Collectors.toSet());
+    ErrorProneJars errorProneJars = new ErrorProneJars(jarUris);
 
     ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+    SelfFirstClassLoader cl = SelfFirstClassLoader.getInstance(errorProneJars);
+
     int exitCode;
-    try (URLClassLoader cl = new SelfFirstClassLoader(urls)) {
+    try {
       Thread.currentThread().setContextClassLoader(cl);
 
       Class<?> builderClass = cl.loadClass("com.google.errorprone.ErrorProneCompiler$Builder");
@@ -75,6 +67,7 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
       throw UncheckedException.throwAsUncheckedException(e);
     } finally {
       Thread.currentThread().setContextClassLoader(tccl);
+      cl.decrementRefCount();
     }
     if (exitCode != 0) {
       throw new CompilationFailedException(exitCode);
@@ -83,7 +76,7 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
     return DID_WORK;
   }
 
-  private static class SelfFirstClassLoader extends URLClassLoader {
+  static class SelfFirstClassLoader extends URLClassLoader {
 
     private static final ClassLoader PLATFORM_CLASSLOADER;
     private static final ClassLoader PARENT_CLASSLOADER;
@@ -104,8 +97,88 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
       PARENT_CLASSLOADER = parentClassloader;
     }
 
-    public SelfFirstClassLoader(URL[] urls) {
-      super(urls, PARENT_CLASSLOADER);
+    /**
+     * Cache ClassLoader to allow JVM properly JIT loaded classes and reuse optimizations after
+     * warm-up.
+     */
+    private static volatile SelfFirstClassLoader INSTANCE;
+
+    private static final Object LOCK = new Object();
+
+    static {
+      // Both SelfFirstClassLoader and URLClassLoader comply with parallelCapable requirements.
+      registerAsParallelCapable();
+    }
+
+    /**
+     * Returns an instance of ClassLoader for required set of jars, caller is responsible for a call
+     * to {@link #decrementRefCount()} when returned ClassLoader is no longer used.
+     */
+    static SelfFirstClassLoader getInstance(final ErrorProneJars errorProneJars) {
+      SelfFirstClassLoader instance = INSTANCE;
+
+      if (!canReuseClassLoader(instance, errorProneJars)) {
+        synchronized (LOCK) {
+          instance = INSTANCE;
+
+          if (!canReuseClassLoader(instance, errorProneJars)) {
+            if (instance != null) {
+              instance.decrementRefCount(); // Indicate release of static reference.
+            }
+
+            instance = INSTANCE = new SelfFirstClassLoader(errorProneJars);
+            instance.incrementRefCount(); // Indicate new static reference.
+          }
+        }
+      }
+
+      instance.incrementRefCount(); // Indicate new reference returned to the caller.
+      return instance;
+    }
+
+    /**
+     * Keeps track of references to the ClassLoader to close it as soon as we know it's safe instead
+     * of waiting for GC.
+     */
+    private final AtomicInteger refCount = new AtomicInteger();
+
+    private final ErrorProneJars errorProneJars;
+
+    private SelfFirstClassLoader(ErrorProneJars errorProneJars) {
+      super(
+          errorProneJars
+              .jars
+              .keySet()
+              .stream()
+              .map(
+                  uri -> {
+                    try {
+                      return uri.toURL();
+                    } catch (MalformedURLException e) {
+                      throw UncheckedException.throwAsUncheckedException(e);
+                    }
+                  })
+              .toArray(URL[]::new),
+          PARENT_CLASSLOADER);
+      this.errorProneJars = errorProneJars;
+    }
+
+    private void incrementRefCount() {
+      refCount.incrementAndGet();
+    }
+
+    void decrementRefCount() {
+      final int refCountLocal = refCount.decrementAndGet();
+
+      if (refCountLocal == 0) {
+        try {
+          close();
+        } catch (IOException e) {
+          throw UncheckedException.throwAsUncheckedException(e);
+        }
+      } else if (refCountLocal < 0) {
+        throw new IllegalStateException("refCount is below zero.");
+      }
     }
 
     @Override
@@ -160,5 +233,60 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
 
     // XXX: we know URLClassLoader#getResourceAsStream calls getResource, so we don't have to
     // override it here.
+
+    private static boolean canReuseClassLoader(
+        SelfFirstClassLoader cachedInstance, ErrorProneJars newErrorProneJars) {
+      return cachedInstance != null && cachedInstance.errorProneJars.equals(newErrorProneJars);
+    }
+  }
+
+  static final class ErrorProneJars {
+    final Map<URI, JarIdentity> jars;
+
+    ErrorProneJars(Set<URI> jars) {
+      this.jars =
+          jars.stream()
+              .map(jarUri -> new HashMap.SimpleEntry<>(jarUri, new JarIdentity(jarUri)))
+              .collect(
+                  Collectors.toMap(
+                      AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      ErrorProneJars that = (ErrorProneJars) o;
+      return Objects.equals(jars, that.jars);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(jars);
+    }
+
+    private static final class JarIdentity {
+      private final long lastModified;
+      private final long lengthBytes;
+
+      JarIdentity(URI jarUri) {
+        final File jar = new File(jarUri);
+        this.lastModified = jar.lastModified();
+        this.lengthBytes = jar.length();
+      }
+
+      @Override
+      public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        JarIdentity that = (JarIdentity) o;
+        return lastModified == that.lastModified && lengthBytes == that.lengthBytes;
+      }
+
+      @Override
+      public int hashCode() {
+        return Objects.hash(lastModified, lengthBytes);
+      }
+    }
   }
 }
