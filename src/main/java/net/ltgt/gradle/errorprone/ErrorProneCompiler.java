@@ -8,10 +8,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.artifacts.Configuration;
@@ -51,7 +48,7 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
     ErrorProneJars errorProneJars = new ErrorProneJars(jarUris);
 
     ClassLoader tccl = Thread.currentThread().getContextClassLoader();
-    URLClassLoader cl = SelfFirstClassLoader.getInstance(errorProneJars);
+    SelfFirstClassLoader cl = SelfFirstClassLoader.getInstance(errorProneJars);
 
     int exitCode;
     try {
@@ -70,6 +67,7 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
       throw UncheckedException.throwAsUncheckedException(e);
     } finally {
       Thread.currentThread().setContextClassLoader(tccl);
+      cl.decrementRefCount();
     }
     if (exitCode != 0) {
       throw new CompilationFailedException(exitCode);
@@ -78,7 +76,7 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
     return DID_WORK;
   }
 
-  private static class SelfFirstClassLoader extends URLClassLoader {
+  static class SelfFirstClassLoader extends URLClassLoader {
 
     private static final ClassLoader PLATFORM_CLASSLOADER;
     private static final ClassLoader PARENT_CLASSLOADER;
@@ -112,6 +110,10 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
       registerAsParallelCapable();
     }
 
+    /**
+     * Returns an instance of ClassLoader for required set of jars, caller is responsible for a call
+     * to {@link #decrementRefCount()} when returned ClassLoader is no longer used.
+     */
     static SelfFirstClassLoader getInstance(final ErrorProneJars errorProneJars) {
       SelfFirstClassLoader instance = INSTANCE;
 
@@ -120,13 +122,25 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
           instance = INSTANCE;
 
           if (!canReuseClassLoader(instance, errorProneJars)) {
+            if (instance != null) {
+              instance.decrementRefCount(); // Indicate release of static reference.
+            }
+
             instance = INSTANCE = new SelfFirstClassLoader(errorProneJars);
+            instance.incrementRefCount(); // Indicate new static reference.
           }
         }
       }
 
+      instance.incrementRefCount(); // Indicate new reference returned to the caller.
       return instance;
     }
+
+    /**
+     * Keeps track of references to the ClassLoader to close it as soon as we know it's safe instead
+     * of waiting for GC.
+     */
+    private final AtomicInteger refCount = new AtomicInteger();
 
     private final ErrorProneJars errorProneJars;
 
@@ -147,6 +161,24 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
               .toArray(URL[]::new),
           PARENT_CLASSLOADER);
       this.errorProneJars = errorProneJars;
+    }
+
+    private void incrementRefCount() {
+      refCount.incrementAndGet();
+    }
+
+    void decrementRefCount() {
+      final int refCountLocal = refCount.decrementAndGet();
+
+      if (refCountLocal == 0) {
+        try {
+          close();
+        } catch (IOException e) {
+          throw UncheckedException.throwAsUncheckedException(e);
+        }
+      } else if (refCountLocal < 0) {
+        throw new IllegalStateException("refCount is below zero.");
+      }
     }
 
     @Override
@@ -208,7 +240,7 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
     }
   }
 
-  private static final class ErrorProneJars {
+  static final class ErrorProneJars {
     final Map<URI, JarIdentity> jars;
 
     ErrorProneJars(Set<URI> jars) {
