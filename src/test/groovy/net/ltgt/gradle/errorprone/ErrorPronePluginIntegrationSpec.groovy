@@ -33,7 +33,7 @@ class ErrorPronePluginIntegrationSpec extends Specification {
       dependencies {
         errorprone fileTree(\$/${System.getProperty('dependencies')}/\$)
       }
-""".stripIndent()
+    """.stripIndent()
   }
 
   def "compilation succeeds"() {
@@ -85,6 +85,34 @@ class ErrorPronePluginIntegrationSpec extends Specification {
     def f = new File(testProjectDir.newFolder('src', 'main', 'java', 'test'), 'Success.java')
     f.createNewFile()
     getClass().getResource("/test/Success.java").withInputStream { f << it }
+
+    when:
+    def result = GradleRunner.create()
+            .withGradleVersion(testGradleVersion)
+            .withProjectDir(testProjectDir.root)
+            .withArguments('--info', 'compileJava')
+            .build()
+
+    then:
+    result.output.contains("Compiling with error-prone compiler")
+    result.task(':compileJava').outcome == TaskOutcome.SUCCESS
+  }
+
+  def "can configure errorprone"() {
+    assumeTrue(GradleVersion.version(testGradleVersion) >= GradleVersion.version("4.6"))
+
+    given:
+    buildFile << """\
+      import net.ltgt.gradle.errorprone.CheckSeverity
+
+      compileJava.options.errorprone {
+        check("ArrayEquals", CheckSeverity.OFF)
+      }
+    """.stripIndent()
+
+    def f = new File(testProjectDir.newFolder('src', 'main', 'java', 'test'), 'Failure.java')
+    f.createNewFile()
+    getClass().getResource("/test/Failure.java").withInputStream { f << it }
 
     when:
     def result = GradleRunner.create()

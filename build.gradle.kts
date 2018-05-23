@@ -1,3 +1,4 @@
+import java.util.concurrent.Callable
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 plugins {
@@ -45,6 +46,7 @@ dependencies {
     testImplementation("org.spockframework:spock-core:1.1-groovy-2.4") {
         exclude(group = "org.codehaus.groovy")
     }
+    testImplementation("com.google.errorprone:error_prone_core:2.3.1")
 }
 
 tasks.withType<JavaCompile> {
@@ -52,6 +54,10 @@ tasks.withType<JavaCompile> {
 }
 tasks.getByName<JavaCompile>("compileJava") {
     options.compilerArgs.add("-XepOpt:NullAway:AnnotatedPackages=net.ltgt.gradle.errorprone")
+}
+
+val jar by tasks.getting(Jar::class) {
+    from(Callable { project(":kotlin-extensions").java.sourceSets["main"].output })
 }
 
 val integTest by configurations.creating
@@ -66,8 +72,6 @@ val prepareIntegTestDependencies by tasks.creating(Copy::class) {
 }
 
 val test by tasks.getting(Test::class) {
-    val jar: Jar by tasks.getting
-
     val testGradleVersion = project.findProperty("test.gradle-version")
     testGradleVersion?.also { systemProperty("test.gradle-version", testGradleVersion) }
 
