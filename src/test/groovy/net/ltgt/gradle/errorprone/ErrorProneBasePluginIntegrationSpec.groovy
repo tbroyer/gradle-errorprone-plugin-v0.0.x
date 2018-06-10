@@ -21,13 +21,7 @@ class ErrorProneBasePluginIntegrationSpec extends Specification {
       apply plugin: 'net.ltgt.errorprone-base'
       apply plugin: 'java'
 
-      repositories {
-        mavenCentral()
-      }
-      dependencies {
-        errorprone fileTree(\$/${System.getProperty('dependencies')}/\$)
-      }
-""".stripIndent()
+    """.stripIndent()
 
     def f = new File(testProjectDir.newFolder('src', 'main', 'java', 'test'), 'Success.java')
     f.createNewFile()
@@ -37,7 +31,18 @@ class ErrorProneBasePluginIntegrationSpec extends Specification {
     getClass().getResource("/test/Failure.java").withInputStream { f << it }
   }
 
+  private addErrorProneDependencies() {
+    buildFile << """\
+      dependencies {
+        errorprone fileTree(\$/${System.getProperty('dependencies')}/\$)
+      }
+    """.stripIndent()
+  }
+
   def "compilation succeeds even when code violates pattern, because Error Prone is not used"() {
+    given:
+    addErrorProneDependencies()
+
     when:
     def result = GradleRunner.create()
         .withProjectDir(testProjectDir.root)
@@ -52,6 +57,7 @@ class ErrorProneBasePluginIntegrationSpec extends Specification {
 
   def "compilation succeeds (Error Prone applied to compileJava only)"() {
     given:
+    addErrorProneDependencies()
     buildFile << """
       import net.ltgt.gradle.errorprone.ErrorProneToolChain
 
@@ -70,5 +76,26 @@ class ErrorProneBasePluginIntegrationSpec extends Specification {
     result.output.contains("Compiling with error-prone compiler")
     result.task(':compileJava').outcome == TaskOutcome.SUCCESS
     result.task(':compileTestJava').outcome == TaskOutcome.SUCCESS
+  }
+
+  def "warns if errorprone dependencies not configured explicitly"() {
+    given:
+    // XXX: this uses an internal method…
+    buildFile << """\
+      task runErrorProneConfigurationDependencyActions {
+        doLast {
+          configurations.errorprone.runDependencyActions()
+        }
+      }
+    """.stripIndent()
+
+    when:
+    def result = GradleRunner.create()
+        .withProjectDir(testProjectDir.root)
+        .withArguments('runErrorProneConfigurationDependencyActions')
+        .build()
+
+    then:
+    result.output.contains(ErrorProneBasePlugin.WARNING_MESSAGE)
   }
 }
