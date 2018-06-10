@@ -66,7 +66,7 @@ tasks.withType(JavaCompile) {
 ```
 
 The plugin adds an `errorprone` configuration that automatically uses the latest release of error-prone.
-You can override it to use a specific version with:
+You *should* override it to use a specific version with:
 
 ```groovy
 dependencies {
@@ -85,6 +85,11 @@ configurations.errorprone {
 ```
 
 </details>
+
+**WARNING:** Using a dynamic or changing version for Error Prone,
+such as the default configuration using `latest.release`,
+means that your build could fail at any time,
+if a new version of Error Prone adds or enables new checks that your code would trigger.
 
 If you forked error-prone and changed the `groupId`, use:
 
