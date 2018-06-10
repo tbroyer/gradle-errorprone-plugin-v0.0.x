@@ -52,7 +52,7 @@ tasks.withType<JavaCompile> {
 val integTest by configurations.creating
 
 dependencies {
-    integTest("com.google.errorprone:error_prone_core:2.2.0")
+    integTest("com.google.errorprone:error_prone_core:2.3.1")
 }
 
 val prepareIntegTestDependencies by tasks.creating(Copy::class) {
