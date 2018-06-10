@@ -29,11 +29,10 @@ class ErrorProneBasePluginIntegrationSpec extends Specification {
       }
 """.stripIndent()
 
-    def p = testProjectDir.newFolder('src', 'main', 'java', 'test')
-    def f = new File(p, 'Success.java')
+    def f = new File(testProjectDir.newFolder('src', 'main', 'java', 'test'), 'Success.java')
     f.createNewFile()
     getClass().getResource("/test/Success.java").withInputStream { f << it }
-    f = new File(p, 'Failure.java')
+    f = new File(testProjectDir.newFolder('src', 'test', 'java', 'test'), 'Failure.java')
     f.createNewFile()
     getClass().getResource("/test/Failure.java").withInputStream { f << it }
   }
@@ -42,12 +41,13 @@ class ErrorProneBasePluginIntegrationSpec extends Specification {
     when:
     def result = GradleRunner.create()
         .withProjectDir(testProjectDir.root)
-        .withArguments('--info', 'compileJava')
+        .withArguments('--info', 'compileTestJava')
         .build()
 
     then:
     !result.output.contains("Compiling with error-prone compiler")
     result.task(':compileJava').outcome == TaskOutcome.SUCCESS
+    result.task(':compileTestJava').outcome == TaskOutcome.SUCCESS
   }
 
   def "compilation succeeds (Error Prone applied to compileJava only)"() {
@@ -56,26 +56,19 @@ class ErrorProneBasePluginIntegrationSpec extends Specification {
       import net.ltgt.gradle.errorprone.ErrorProneToolChain
 
       compileJava {
-        include 'test/Success.java'
         toolChain ErrorProneToolChain.create(project)
-      }
-      task compileFailure(type: JavaCompile) {
-        classpath = sourceSets.main.compileClasspath
-        destinationDir = sourceSets.main.output.classesDir
-        source sourceSets.main.java
-        include 'test/Failure.java'
       }
     """.stripIndent()
 
     when:
     def result = GradleRunner.create()
         .withProjectDir(testProjectDir.root)
-        .withArguments('--info', 'compileJava', 'compileFailure')
+        .withArguments('--info', 'compileTestJava')
         .build()
 
     then:
     result.output.contains("Compiling with error-prone compiler")
     result.task(':compileJava').outcome == TaskOutcome.SUCCESS
-    result.task(':compileFailure').outcome == TaskOutcome.SUCCESS
+    result.task(':compileTestJava').outcome == TaskOutcome.SUCCESS
   }
 }
