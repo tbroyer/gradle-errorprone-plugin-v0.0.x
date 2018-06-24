@@ -18,31 +18,31 @@ matrix:
     jdk: oraclejdk8
   - env: TEST_GRADLE_VERSION=2.13
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSION=2.14
+  - env: TEST_GRADLE_VERSION=2.14.1
     jdk: oraclejdk8
   - env: TEST_GRADLE_VERSION=3.0
     jdk: oraclejdk8
   - env: TEST_GRADLE_VERSION=3.1
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSION=3.2
+  - env: TEST_GRADLE_VERSION=3.2.1
     jdk: oraclejdk8
   - env: TEST_GRADLE_VERSION=3.3
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSION=3.4
+  - env: TEST_GRADLE_VERSION=3.4.1
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSION=3.5
+  - env: TEST_GRADLE_VERSION=3.5.1
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSION=4.0
+  - env: TEST_GRADLE_VERSION=4.0.2
     jdk: oraclejdk8
   - env: TEST_GRADLE_VERSION=4.1
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSION=4.2
+  - env: TEST_GRADLE_VERSION=4.2.1
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSION=4.3
+  - env: TEST_GRADLE_VERSION=4.3.1
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSION=4.4
+  - env: TEST_GRADLE_VERSION=4.4.1
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSION=4.5
+  - env: TEST_GRADLE_VERSION=4.5.1
     jdk: oraclejdk8
   - env: TEST_GRADLE_VERSION=4.6
     jdk: oraclejdk8
@@ -51,11 +51,11 @@ matrix:
   - env: TEST_GRADLE_VERSION=4.8.1
     jdk: oraclejdk8
 
-  - env: TEST_GRADLE_VERSION=4.3
+  - env: TEST_GRADLE_VERSION=4.3.1
     jdk: oraclejdk9
-  - env: TEST_GRADLE_VERSION=4.4
+  - env: TEST_GRADLE_VERSION=4.4.1
     jdk: oraclejdk9
-  - env: TEST_GRADLE_VERSION=4.5
+  - env: TEST_GRADLE_VERSION=4.5.1
     jdk: oraclejdk9
   - env: TEST_GRADLE_VERSION=4.6
     jdk: oraclejdk9
