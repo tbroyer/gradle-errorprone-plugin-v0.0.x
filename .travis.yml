@@ -48,7 +48,7 @@ matrix:
     jdk: oraclejdk8
   - env: TEST_GRADLE_VERSION=4.7
     jdk: oraclejdk8
-  - env: TEST_GRADLE_VERSION=4.8
+  - env: TEST_GRADLE_VERSION=4.8.1
     jdk: oraclejdk8
 
   - env: TEST_GRADLE_VERSION=4.3
@@ -61,7 +61,7 @@ matrix:
     jdk: oraclejdk9
   - env: TEST_GRADLE_VERSION=4.7
     jdk: oraclejdk9
-  - env: TEST_GRADLE_VERSION=4.8
+  - env: TEST_GRADLE_VERSION=4.8.1
     jdk: oraclejdk9
 install: true
 script: ./gradlew build -Ptest.gradle-version="$TEST_GRADLE_VERSION"
