@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import javax.annotation.Nullable;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.internal.tasks.compile.CompilationFailedException;
@@ -86,7 +87,7 @@ public class ErrorProneCompiler implements Compiler<JavaCompileSpec> {
   private static class SelfFirstClassLoader extends URLClassLoader {
 
     private static final ClassLoader PLATFORM_CLASSLOADER;
-    private static final ClassLoader PARENT_CLASSLOADER;
+    @Nullable private static final ClassLoader PARENT_CLASSLOADER;
 
     static {
       ClassLoader platformClassloader, parentClassloader;

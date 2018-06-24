@@ -38,6 +38,8 @@ repositories {
 dependencies {
     errorprone("com.google.errorprone:error_prone_core:2.3.1")
 
+    annotationProcessor("com.uber.nullaway:nullaway:0.4.7")
+
     testImplementation(localGroovy())
     testImplementation("com.netflix.nebula:nebula-test:6.4.2")
     testImplementation("org.spockframework:spock-core:1.1-groovy-2.4") {
@@ -47,6 +49,9 @@ dependencies {
 
 tasks.withType<JavaCompile> {
     options.compilerArgs.addAll(arrayOf("-Xlint:all", "-Werror"))
+}
+tasks.getByName<JavaCompile>("compileJava") {
+    options.compilerArgs.add("-XepOpt:NullAway:AnnotatedPackages=net.ltgt.gradle.errorprone")
 }
 
 val integTest by configurations.creating
