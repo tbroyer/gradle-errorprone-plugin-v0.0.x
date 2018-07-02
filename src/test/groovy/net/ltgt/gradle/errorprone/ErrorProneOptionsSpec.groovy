@@ -28,11 +28,9 @@ class ErrorProneOptionsSpec extends ProjectSpec {
             { excludedPaths.set(".*/build/generated/.*") },
             { check("ArrayEquals") },
             { check("ArrayEquals", CheckSeverity.WARN) },
-            { checks["ArrayEquals"] = CheckSeverity.ERROR },
             { checks = ["ArrayEquals": CheckSeverity.DEFAULT] },
             { option("Foo") },
             { option("Foo", "Bar") },
-            { checkOptions["Foo"] = "Bar" },
             { checkOptions = ["Foo": "Bar"] },
             {
                 disableAllChecks.set(true)
@@ -96,7 +94,7 @@ class ErrorProneOptionsSpec extends ProjectSpec {
         options.with(configure)
 
         when:
-        options.asArguments()
+        new ErrorProneArgumentProvider(options).asArguments()
 
         then:
         InvalidUserDataException e = thrown()
@@ -121,7 +119,7 @@ class ErrorProneOptionsSpec extends ProjectSpec {
         when:
         def options = new ErrorProneOptions(project.objects)
         options.check("ArrayEquals:OFF")
-        options.asArguments()
+        new ErrorProneArgumentProvider(options).asArguments()
 
         then:
         InvalidUserDataException e = thrown()
@@ -140,7 +138,7 @@ class ErrorProneOptionsSpec extends ProjectSpec {
     }
 
     private com.google.errorprone.ErrorProneOptions parseOptions(ErrorProneOptions options) {
-        return com.google.errorprone.ErrorProneOptions.processArgs(options.asArguments())
+        return com.google.errorprone.ErrorProneOptions.processArgs(new ErrorProneArgumentProvider(options).asArguments())
     }
 
     private void assertOptionsEqual(
@@ -154,8 +152,8 @@ class ErrorProneOptionsSpec extends ProjectSpec {
         assert parsedOptions.ignoreUnknownChecks() == options.ignoreUnknownCheckNames.getOrElse(false)
         assert parsedOptions.testOnlyTarget == options.isCompilingTestOnlyCode.getOrElse(false)
         assert parsedOptions.excludedPattern?.pattern() == options.excludedPaths.getOrNull()
-        assert parsedOptions.severityMap == options.checks.collectEntries { k, v -> [ k, toSeverity(v) ] }
-        assert parsedOptions.flags.flagsMap == options.checkOptions
+        assert parsedOptions.severityMap == options.checks.get().collectEntries { k, v -> [ k, toSeverity(v) ] }
+        assert parsedOptions.flags.flagsMap == options.checkOptions.get()
         assert parsedOptions.remainingArgs.length == 0
     }
 
