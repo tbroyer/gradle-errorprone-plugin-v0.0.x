@@ -4,7 +4,6 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.tasks.compile.JavaCompile;
-import org.gradle.util.GradleVersion;
 
 public class ErrorPronePlugin implements Plugin<Project> {
   @Override
@@ -14,13 +13,9 @@ public class ErrorPronePlugin implements Plugin<Project> {
     final ErrorProneToolChain toolChain = ErrorProneToolChain.create(project);
     project.getTasks().withType(JavaCompile.class).all(task -> task.setToolChain(toolChain));
 
-    final boolean supportsCommandLineArgumentProvider =
-        GradleVersion.current().compareTo(GradleVersion.version("4.6")) >= 0;
-    if (supportsCommandLineArgumentProvider) {
+    if (ErrorProneBasePlugin.SUPPORTS_COMMAND_LINE_ARGUMENT_PROVIDER) {
       final ErrorProneExtension errorproneExtension =
-          project
-              .getExtensions()
-              .create(ErrorProneExtension.NAME, ErrorProneExtension.class, project.getObjects());
+          project.getExtensions().getByType(ErrorProneExtension.class);
       project
           .getTasks()
           .withType(JavaCompile.class)
