@@ -130,6 +130,10 @@ import net.ltgt.gradle.errorprone.ErrorProneToolChain
 
 compileJava {
   toolChain ErrorProneToolChain.create(project)
+
+  inputs.files(configurations.errorprone).withNormalizer(ClasspathNormalizer)
+  // With Gradle < 4.3, use:
+  // inputs.files(configurations.errorprone)
 }
 ```
 
@@ -142,6 +146,10 @@ import net.ltgt.gradle.errorprone.ErrorProneToolChain
 
 compileJava {
   toolChain new ErrorProneToolChain(configurations.errorprone)
+
+  inputs.files(configurations.errorprone).withNormalizer(ClasspathNormalizer)
+  // With Gradle < 4.3, use:
+  // inputs.files(configurations.errorprone)
 }
 ```
 
