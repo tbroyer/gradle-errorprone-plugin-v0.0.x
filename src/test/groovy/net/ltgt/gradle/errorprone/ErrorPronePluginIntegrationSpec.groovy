@@ -97,4 +97,46 @@ class ErrorPronePluginIntegrationSpec extends Specification {
     result.output.contains("Compiling with error-prone compiler")
     result.task(':compileJava').outcome == TaskOutcome.SUCCESS
   }
+
+  def "out-of-date when errorprone configuration changes"() {
+    given:
+    def f = new File(testProjectDir.newFolder('src', 'main', 'java', 'test'), 'Success.java')
+    f.createNewFile()
+    getClass().getResource("/test/Success.java").withInputStream { f << it }
+
+    when:
+    def result = GradleRunner.create()
+            .withGradleVersion(testGradleVersion)
+            .withProjectDir(testProjectDir.root)
+            .withArguments('--info', 'compileJava')
+            .build()
+
+    then:
+    result.output.contains("Compiling with error-prone compiler")
+    result.task(':compileJava').outcome == TaskOutcome.SUCCESS
+
+    // Additional run to make sure the task is not always out of date
+    when:
+    result = GradleRunner.create()
+            .withGradleVersion(testGradleVersion)
+            .withProjectDir(testProjectDir.root)
+            .withArguments('--info', 'compileJava')
+            .build()
+
+    then:
+    result.task(':compileJava').outcome == TaskOutcome.UP_TO_DATE
+    !result.output.contains("Compiling with error-prone compiler")
+
+    when:
+    buildFile.text = buildFile.text.replace(System.getProperty('dependencies'), System.getProperty('dependencies-old'))
+    result = GradleRunner.create()
+            .withGradleVersion(testGradleVersion)
+            .withProjectDir(testProjectDir.root)
+            .withArguments('--info', 'compileJava')
+            .build()
+
+    then:
+    result.task(':compileJava').outcome == TaskOutcome.SUCCESS
+    result.output.contains("Compiling with error-prone compiler")
+  }
 }

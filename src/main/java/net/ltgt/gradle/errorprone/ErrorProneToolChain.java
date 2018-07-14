@@ -26,6 +26,10 @@ public class ErrorProneToolChain implements JavaToolChainInternal {
     this.configuration = configuration;
   }
 
+  Configuration getConfiguration() {
+    return configuration;
+  }
+
   @Override
   public String getName() {
     return String.format("ErrorProneJDK%s", javaVersion);

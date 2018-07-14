@@ -55,14 +55,21 @@ tasks.getByName<JavaCompile>("compileJava") {
 }
 
 val integTest by configurations.creating
+val integTest2 by configurations.creating
 
 dependencies {
     integTest("com.google.errorprone:error_prone_core:2.3.1")
+    integTest2("com.google.errorprone:error_prone_core:2.3.0")
 }
 
 val prepareIntegTestDependencies by tasks.creating(Copy::class) {
     from(integTest)
-    into("$buildDir/integTestDependencies/")
+    into("$buildDir/integTestDependencies")
+}
+
+val prepareIntegTest2Dependencies by tasks.creating(Copy::class) {
+    from(integTest2)
+    into("$buildDir/integTest2Dependencies")
 }
 
 val test by tasks.getting(Test::class) {
@@ -72,9 +79,11 @@ val test by tasks.getting(Test::class) {
     testGradleVersion?.also { systemProperty("test.gradle-version", testGradleVersion) }
 
     inputs.files(prepareIntegTestDependencies).withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.files(prepareIntegTest2Dependencies).withPathSensitivity(PathSensitivity.RELATIVE)
     inputs.files(jar).withPathSensitivity(PathSensitivity.NONE)
 
     systemProperty("dependencies", prepareIntegTestDependencies.destinationDir)
+    systemProperty("dependencies-old", prepareIntegTest2Dependencies.destinationDir)
     systemProperty("plugin", jar.archivePath)
 
     testLogging {
