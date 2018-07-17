@@ -27,6 +27,7 @@ It also depends on Javac internal APIs, directly exposed by error-prone.
  0.0.12                            | 2.6 - 4.9                 | 2.+                           | 8
  0.0.13                            | 2.6 - 4.9                 | 2.+                           | 8, 9
  0.0.14                            | 2.6 - 4.9                 | 2.+                           | 8, 9
+ 0.0.15                            | 2.6 - 4.9                 | 2.+                           | 8, 9
  _master_                          | 2.6 - 4.9                 | 2.+                           | 8, 9
 
 ¹: error-prone 1.x is only supported with JDK 7
@@ -70,7 +71,7 @@ You *should* override it to use a specific version with:
 
 ```groovy
 dependencies {
-  errorprone 'com.google.errorprone:error_prone_core:2.0.21'
+  errorprone 'com.google.errorprone:error_prone_core:2.3.1'
 }
 ```
 
