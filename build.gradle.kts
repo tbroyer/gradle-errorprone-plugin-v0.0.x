@@ -5,7 +5,7 @@ plugins {
     groovy
     id("com.gradle.plugin-publish") version "0.9.10"
     id("com.github.sherter.google-java-format") version "0.7.1"
-    id("net.ltgt.errorprone") version "0.0.14"
+    id("net.ltgt.errorprone") version "0.0.15"
 }
 
 googleJavaFormat {
