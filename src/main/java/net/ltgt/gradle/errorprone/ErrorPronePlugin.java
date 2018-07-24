@@ -5,12 +5,14 @@ import static java.util.Objects.requireNonNull;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import javax.annotation.Nullable;
+import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.tasks.TaskInputs;
 import org.gradle.api.tasks.compile.JavaCompile;
+import org.gradle.util.GradleVersion;
 
 public class ErrorPronePlugin implements Plugin<Project> {
   @Override
@@ -18,14 +20,16 @@ public class ErrorPronePlugin implements Plugin<Project> {
     project.getPluginManager().apply(ErrorProneBasePlugin.class);
 
     final ErrorProneToolChain toolChain = ErrorProneToolChain.create(project);
-    project
-        .getTasks()
-        .withType(JavaCompile.class)
-        .all(
-            task -> {
-              task.setToolChain(toolChain);
-              taskGetInputsFiles(task, toolChain.getConfiguration());
-            });
+    Action<JavaCompile> action =
+        task -> {
+          task.setToolChain(toolChain);
+          taskGetInputsFiles(task, toolChain.getConfiguration());
+        };
+    if (GradleVersion.current().compareTo(GradleVersion.version("4.9")) >= 0) {
+      project.getTasks().withType(JavaCompile.class).configureEach(action);
+    } else {
+      project.getTasks().withType(JavaCompile.class, action);
+    }
   }
 
   private void taskGetInputsFiles(JavaCompile task, Configuration configuration) {
