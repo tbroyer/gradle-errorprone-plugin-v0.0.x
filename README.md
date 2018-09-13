@@ -1,5 +1,7 @@
-Gradle error-prone plugin
-=========================
+Gradle error-prone plugin v0.0.x
+================================
+
+## This repository contains the implementation for versions 0.0.x of the plugin, new development (starting with version 0.6) happens in https://github.com/tbroyer/gradle-errorprone-plugin
 
 This plugin configures `JavaCompile` tasks to use the [error-prone compiler].
 
